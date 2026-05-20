@@ -3,16 +3,16 @@
 }
 
 :root {
-  --bg: #f8f4ec;
-  --surface: #fffaf3;
-  --surface-strong: #ffffff;
-  --text: #1f1a14;
-  --muted: #6c6157;
-  --line: #ded4c5;
-  --accent: #926644;
-  --accent-dark: #5c3a23;
-  --accent-soft: #f1dfcb;
-  --shadow: 0 24px 70px rgba(61, 42, 24, 0.14);
+  --bg: #0f1720;
+  --surface: rgba(18, 29, 44, 0.96);
+  --surface-strong: rgba(23, 34, 52, 0.98);
+  --text: #ebf1f5;
+  --muted: #9ab3c4;
+  --line: rgba(111, 151, 182, 0.18);
+  --accent: #5ed3c2;
+  --accent-dark: #1b7d75;
+  --accent-soft: rgba(94, 211, 194, 0.12);
+  --shadow: 0 28px 60px rgba(0, 0, 0, 0.32);
   --radius: 28px;
 }
 
@@ -24,9 +24,9 @@ body {
   margin: 0;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background:
-    radial-gradient(circle at top left, rgba(235, 211, 180, 0.65), transparent 36rem),
-    radial-gradient(circle at bottom right, rgba(205, 166, 117, 0.18), transparent 30rem),
-    var(--bg);
+    radial-gradient(circle at 15% 10%, rgba(94, 211, 194, 0.12), transparent 24rem),
+    radial-gradient(circle at 80% 20%, rgba(94, 211, 194, 0.06), transparent 28rem),
+    linear-gradient(180deg, #111827 0%, #0b1220 100%);
   color: var(--text);
   line-height: 1.65;
 }
@@ -47,8 +47,8 @@ textarea {
   top: 0;
   z-index: 20;
   backdrop-filter: blur(18px);
-  background: rgba(248, 244, 236, 0.88);
-  border-bottom: 1px solid rgba(222, 212, 197, 0.8);
+  background: rgba(15, 23, 40, 0.86);
+  border-bottom: 1px solid rgba(94, 211, 194, 0.14);
 }
 
 .nav {
@@ -80,7 +80,7 @@ textarea {
 }
 
 .nav-links a:hover {
-  color: var(--accent-dark);
+  color: var(--accent);
 }
 
 .nav-toggle {
@@ -166,13 +166,14 @@ h3 {
 
 .btn.primary {
   color: white;
-  background: var(--accent-dark);
-  box-shadow: 0 14px 34px rgba(95, 60, 32, 0.25);
+  background: var(--accent);
+  box-shadow: 0 18px 40px rgba(94, 211, 194, 0.24);
 }
 
 .btn.secondary {
-  border: 1px solid var(--line);
-  background: rgba(255, 250, 243, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
 }
 
 .hero-card,
@@ -181,8 +182,8 @@ h3 {
 .education-card,
 .contact-card,
 .timeline-content {
-  background: rgba(255, 250, 243, 0.9);
-  border: 1px solid rgba(222, 212, 197, 0.9);
+  background: var(--surface);
+  border: 1px solid rgba(94, 211, 194, 0.12);
   box-shadow: var(--shadow);
 }
 
@@ -198,7 +199,7 @@ h3 {
   display: grid;
   place-items: center;
   color: white;
-  background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+  background: linear-gradient(135deg, rgba(30, 60, 74, 1), rgba(94, 211, 194, 1));
   font-weight: 900;
   font-size: 1.35rem;
   margin-bottom: 24px;

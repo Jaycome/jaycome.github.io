@@ -1,77 +1,41 @@
-# Wei-Chieh Huang Personal Website
+# Wei-Chieh Huang — Personal Portfolio Website
 
-This is a static personal portfolio website for GitHub Pages.
+A responsive personal portfolio website built with HTML, CSS, and JavaScript, designed to present my experience in AI systems, full-stack development, product engineering, and system integration.
 
-## Files
+## Live Demo
 
-- `index.html` — main website content
-- `styles.css` — website styling
-- `script.js` — mobile navigation and small interactions
-- `assets/resume.pdf` — downloadable CV
+[View Portfolio Website](https://jaycome.github.io/)
 
-## Deploy to GitHub Pages
+## Overview
 
-### Option A: User site, recommended for a personal website
+This website serves as my professional portfolio for software engineering, AI application engineering, and full-stack roles. It highlights my selected work experience, technical projects, skills, and contact information through a lightweight static website deployed with GitHub Pages.
 
-1. Create a GitHub repository named:
+The goal of this project is not only to present my resume online, but also to demonstrate basic software project organisation, clean documentation, and maintainable static-site deployment.
 
-```text
-<your-github-username>.github.io
-```
+## Features
 
-For example:
+- Responsive layout for desktop and mobile devices
+- Project-focused portfolio sections
+- Professional summary, experience, skills, and contact information
+- Lightweight static deployment via GitHub Pages
+- Custom 404 page
+- Mobile navigation interaction with JavaScript
 
-```text
-Jaycome.github.io
-```
+## Tech Stack
 
-2. Upload all files in this folder to the repository root.
-3. Go to **Settings → Pages**.
-4. Under **Build and deployment**, choose:
-   - Source: `Deploy from a branch`
-   - Branch: `main`
-   - Folder: `/root`
-5. Save.
-6. Your website should be available at:
+- HTML5
+- CSS3
+- JavaScript
+- GitHub Pages
+
+## Project Structure
 
 ```text
-https://<your-github-username>.github.io
-```
-
-### Option B: Project site
-
-If you do not want to use `<username>.github.io`, create any repository name such as:
-
-```text
-portfolio
-```
-
-Then your website URL will usually be:
-
-```text
-https://<your-github-username>.github.io/portfolio
-```
-
-## Customise before publishing
-
-Update these items in `index.html`:
-
-- LinkedIn URL
-- GitHub URL
-- Email address
-- Project links, if you want each project to link to a GitHub repo
-- Any quantified results that you want to make more conservative for public LinkedIn / recruiter viewing
-
-## Local preview
-
-Open `index.html` directly in your browser, or run:
-
-```bash
-python3 -m http.server 8000
-```
-
-Then open:
-
-```text
-http://localhost:8000
-```
+.
+├── index.html
+├── styles.css
+├── script.js
+├── 404.html
+├── README.md
+├── LICENSE
+└── .gitignore

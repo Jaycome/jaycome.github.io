@@ -722,13 +722,184 @@ h3 {
   }
 }
 
+/* Motion
+   One orchestrated moment on load (the answer gets grounded in its sources),
+   then motion only where something happens: a pipeline running as it scrolls
+   into view, results counting up, and feedback on hover and focus. */
+
+.button {
+  transition: background-color 0.18s, transform 0.18s, box-shadow 0.18s;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -8px rgba(15, 109, 115, 0.55);
+}
+
+.button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.masthead nav a {
+  background: linear-gradient(var(--teal), var(--teal)) left bottom / 0 2px no-repeat;
+  transition: color 0.18s, background-size 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.masthead nav a:hover,
+.masthead nav a[aria-current="true"] {
+  background-size: 100% 2px;
+}
+
+.masthead nav a[aria-current="true"] {
+  color: var(--ink);
+}
+
+.case-no {
+  transition: background-color 0.3s, color 0.3s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+
+  @keyframes pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    70% {
+      background: var(--teal);
+      color: var(--paper);
+    }
+  }
+
+  @keyframes slide-in {
+    0% {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    60% {
+      background: var(--teal-wash);
+    }
+  }
+
+  @keyframes step {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+      border-color: var(--teal);
+    }
+    55% {
+      opacity: 1;
+      transform: none;
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px var(--teal-wash);
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+
+  @keyframes arrive {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    55% {
+      opacity: 1;
+      transform: none;
+      box-shadow: 0 0 0 4px var(--teal-wash);
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+
+  @keyframes ring {
+    from {
+      box-shadow: 0 0 0 0 rgba(15, 109, 115, 0.45);
+    }
+    to {
+      box-shadow: 0 0 0 14px rgba(15, 109, 115, 0);
+    }
+  }
+
+  /* Load sequence */
+  .intro .role,
+  .intro h1,
+  .answer > p,
+  .sources {
+    animation: rise 0.75s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .intro .role { animation-delay: 0.05s; }
+  .intro h1 { animation-delay: 0.14s; }
+  .answer > p:first-child { animation-delay: 0.42s; }
+  .sources { animation-delay: 0.56s; }
+  .answer > .actions { animation-delay: 1.9s; }
+
+  .cite {
+    animation: pop 0.5s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  }
+
+  .sources li {
+    animation: slide-in 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .cite[href="#doc-qa"],
+  .sources li:nth-child(1) { animation-delay: 1.05s; }
+  .cite[href="#maintenance-rag"],
+  .sources li:nth-child(2) { animation-delay: 1.35s; }
+  .cite[href="#skin-analysis"],
+  .sources li:nth-child(3) { animation-delay: 1.65s; }
+
+  /* Pipelines run when they scroll into view */
+  .js .flow:not(.run) li,
+  .js .results:not(.run) div {
+    opacity: 0;
+  }
+
+  .flow.run li {
+    animation: step 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .flow.run li.end {
+    animation-name: arrive;
+  }
+
+  .flow.run li:nth-child(2) { animation-delay: 0.28s; }
+  .flow.run li:nth-child(3) { animation-delay: 0.56s; }
+  .flow.run li:nth-child(4) { animation-delay: 0.84s; }
+  .flow.run li:nth-child(5) { animation-delay: 1.12s; }
+
+  .results.run div {
+    animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .results.run div:nth-child(2) { animation-delay: 0.15s; }
+
+  /* Arriving from a citation */
+  .case:target .case-no,
+  .earlier-item:target .case-no {
+    animation: ring 0.9s ease-out 0.2s 2;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
 
-  * {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
+    animation: none !important;
   }
 }
 
@@ -740,5 +911,10 @@ h3 {
   .actions,
   .skip {
     display: none;
+  }
+
+  .flow li,
+  .results div {
+    opacity: 1 !important;
   }
 }

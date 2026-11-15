@@ -14,6 +14,7 @@
   <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
+  <script>document.documentElement.classList.add("js");</script>
 </head>
 
 <body>
@@ -107,7 +108,7 @@
           <dl class="results">
             <div>
               <dt>Overall answer accuracy</dt>
-              <dd>97%</dd>
+              <dd><span data-count="97">97</span>%</dd>
             </div>
           </dl>
         </div>
@@ -150,11 +151,11 @@
           <dl class="results">
             <div>
               <dt>Precision@10</dt>
-              <dd>80% <span class="to">to</span> 95%</dd>
+              <dd>80% <span class="to">to</span> <span data-count="95" data-from="80">95</span>%</dd>
             </div>
             <div>
               <dt>Time to first token</dt>
-              <dd>50% shorter</dd>
+              <dd><span data-count="50">50</span>% shorter</dd>
             </div>
           </dl>
         </div>
@@ -283,5 +284,7 @@
   <footer class="colophon">
     <p>© 2026 Wei-Chieh Huang</p>
   </footer>
+
+  <script src="script.js" defer></script>
 </body>
 </html>

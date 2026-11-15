@@ -17,7 +17,8 @@ experience, skills and contact details. Content mirrors the resume in `assets/re
 - Milk-white background, charcoal text, one teal accent shared with the resume
 - Schibsted Grotesk for headings, Source Sans 3 for text, both self-hosted (OFL-1.1)
 - The summary cites its case studies the way a RAG answer cites sources
-- Plain HTML and CSS: no JavaScript, no build step, no external requests
+- Motion: a load sequence that grounds the summary in its sources, pipelines that run as they scroll into view, and result counters. All of it is off under `prefers-reduced-motion`
+- Plain HTML and CSS with one small optional script: no build step, no external requests, and the page is complete without JavaScript
 
 ## Project Structure
 
@@ -25,6 +26,7 @@ experience, skills and contact details. Content mirrors the resume in `assets/re
 .
 ├── index.html
 ├── styles.css
+├── script.js
 ├── 404.html
 ├── assets/
 │   ├── resume.pdf

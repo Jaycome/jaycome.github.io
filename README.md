@@ -18,7 +18,7 @@ skills and contact details follow. Work content mirrors the resume in `assets/re
 - Milk-white background, charcoal text, one teal accent shared with the resume
 - Schibsted Grotesk for headings, Source Sans 3 for text, both self-hosted (OFL-1.1)
 - The landing screen plays out a retrieval-augmented answer: a question is typed, the resume summary streams in, and its sources attach as links to the case studies
-- Behind it, a canvas field of drifting points shows nearest-neighbour retrieval. The query point links to its five closest points and follows the pointer
+- Beside it, a point-cloud brain whose regions are the sections of the page (frontal = Work, parietal = Projects, temporal = Experience, occipital = Skills, cerebellum = Contact). Points assemble on load, signals travel along the links, regions light up in turn, and pointing at or clicking a region highlights it and goes to that section. The same links are plain anchors without JavaScript
 - Pipelines run step by step as they scroll into view and result figures count up. All motion is off under `prefers-reduced-motion`
 - Plain HTML and CSS with one small optional script: no build step, no external requests, and the page is complete without JavaScript
 

@@ -34,8 +34,6 @@
 
   <main id="top">
     <section class="landing">
-      <canvas class="field" aria-hidden="true"></canvas>
-
       <div class="landing-inner">
         <p class="query">
           <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -65,6 +63,17 @@
           <a class="button quiet" href="assets/resume.pdf" download="Wei-Chieh_Huang_Resume.pdf">Download resume (PDF)</a>
         </p>
       </div>
+
+      <nav class="brain" aria-label="Sections, shown as regions of a brain">
+        <canvas aria-hidden="true"></canvas>
+        <ul>
+          <li><a href="#work" data-region="0" style="--x: 27%; --y: 40%">Work</a></li>
+          <li><a href="#projects" data-region="1" style="--x: 58%; --y: 21%">Projects</a></li>
+          <li><a href="#experience" data-region="2" style="--x: 43%; --y: 69%">Experience</a></li>
+          <li><a href="#skills" data-region="3" style="--x: 85%; --y: 43%">Skills</a></li>
+          <li><a href="#contact" data-region="4" style="--x: 74%; --y: 86%">Contact</a></li>
+        </ul>
+      </nav>
     </section>
 
     <section id="work" class="band">

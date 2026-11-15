@@ -33,6 +33,7 @@
   }
 
   var landing = document.querySelector(".landing");
+  var retrieval = null;   // when the graph should run its retrieval, in ms
   if (landing && !reduce) {
     var query = landing.querySelector(".query");
     var typed = stream(landing.querySelector("[data-stream='char']"), 0.45, 0.03);
@@ -44,24 +45,28 @@
     landing.querySelectorAll(".retrieved li").forEach(function (li, i) {
       delay(li, answered + 0.12 + i * 0.15);
     });
+    retrieval = { start: typed * 1000, end: (answered + 0.9) * 1000 };
     landing.classList.add("play");
   }
 
-  /* ---------- Landing: the knowledge graph ----------
-     The site as a small force-directed graph. The centre node is the person,
-     the five labelled nodes are the sections, and the small nodes are what
-     each section holds. Nodes spring into place on load, signals travel
-     along the links, sections light up in turn until the visitor points at
-     one, any node can be dragged, and a click goes to that part of the page. */
+  /* ---------- Landing: the knowledge graph, as a rotating sphere ----------
+     The site as a graph in three dimensions. The centre node is the person,
+     the five labelled nodes are the sections, the small nodes are what each
+     section holds, and the faint mesh is the rest of the index. It turns on
+     its own, can be spun by dragging, and lights up whichever section faces
+     the visitor. When the question on the left has been typed, a retrieval
+     runs across it: centre, Work, then the three cases the answer cites. */
 
-  function graph(nav) {
+  function graph(nav, timing) {
     var canvas = nav.querySelector("canvas");
     var ctx = canvas.getContext("2d");
     if (!ctx) return;
     var anchors = Array.prototype.slice.call(nav.querySelectorAll("a[data-node]"));
-    var GW = 400, GH = 360, CX = 200, CY = 180;      // graph space
-    var TEAL = "15,109,115", SLATE = "88,98,102";
+    var SIZE = 450, R = 142, INNER = 108, OUTER = 174, FOCAL = 620;
+    var TEAL = "15,109,115", SLATE = "88,98,102", INK = "35,41,43";
 
+    var DIRS = { work: [-0.6, -0.45, 0.66], projects: [0.66, -0.52, 0.55], skills: [0.93, 0.3, -0.22],
+                 contact: [-0.05, 0.84, -0.54], experience: [-0.84, 0.32, -0.44] };
     var LEAVES = {
       work: [["Document QA Agent", "doc-qa"], ["Maintenance RAG", "maintenance-rag"], ["Skin analysis", "skin-analysis"]],
       projects: [["Harness", "projects"], ["Calico MCTS", "projects"], ["tw50-quant-data", "projects"]],
@@ -73,32 +78,72 @@
     var CROSS = [["RAG", "Document QA Agent"], ["RAG", "Maintenance RAG"], ["vLLM", "Maintenance RAG"],
                  ["Docker", "Maintenance RAG"], ["Docker", "Harness"], ["Python", "Harness"], ["Python", "Calico MCTS"]];
 
-    var nodes = [], edges = [], pulses = [], byLabel = {};
-    var centre = { kind: "centre", x: CX, y: CY, vx: 0, vy: 0, charge: 3.2, section: -1, r: 21 };
+    function unit(v) {
+      var d = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) || 1;
+      return [v[0] / d, v[1] / d, v[2] / d];
+    }
+    function cross3(a, b) {
+      return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    }
+    function make(kind, dir, radius, extra) {
+      var n = { kind: kind, p: [dir[0] * radius, dir[1] * radius, dir[2] * radius], sx: 0, sy: 0, z: 0, k: 1, flash: -9 };
+      for (var key in extra) n[key] = extra[key];
+      return n;
+    }
+
+    var nodes = [], edges = [], mesh = [], meshEdges = [], byLabel = {}, byTarget = {};
+    var centre = make("centre", [0, 0, 0], 0, { section: -1 });
     nodes.push(centre);
     anchors.forEach(function (a, i) {
-      var angle = -2.5 + i * (Math.PI * 2 / anchors.length);
-      var section = { kind: "section", el: a, section: i, charge: 2.6, r: 30, vx: 0, vy: 0,
-                      x: CX + Math.cos(angle) * 8, y: CY + Math.sin(angle) * 8 };
+      var d = unit(DIRS[a.dataset.node]);
+      var section = make("section", d, INNER, { el: a, section: i });
+      a.node = section;
       nodes.push(section);
-      edges.push({ a: centre, b: section, len: 90, k: 0.03, section: i });
-      (LEAVES[a.dataset.node] || []).forEach(function (leaf, j) {
-        var node = { kind: "leaf", label: leaf[0], target: leaf[1], section: i, charge: 1, r: 4.2, vx: 0, vy: 0,
-                     x: section.x + Math.cos(angle + j) * 4, y: section.y + Math.sin(angle + j) * 4 };
+      edges.push({ a: centre, b: section, section: i });
+      var u = unit(cross3(d, Math.abs(d[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0]));
+      var v = cross3(d, u);
+      var list = LEAVES[a.dataset.node] || [];
+      list.forEach(function (leaf, j) {
+        var angle = 0.6 + j * (Math.PI * 2 / list.length);
+        var spread = list.length > 3 ? 0.68 : 0.58;
+        var dir = unit([d[0] + spread * (Math.cos(angle) * u[0] + Math.sin(angle) * v[0]),
+                        d[1] + spread * (Math.cos(angle) * u[1] + Math.sin(angle) * v[1]),
+                        d[2] + spread * (Math.cos(angle) * u[2] + Math.sin(angle) * v[2])]);
+        var node = make("leaf", dir, OUTER, { label: leaf[0], target: leaf[1], section: i });
         nodes.push(node);
         byLabel[leaf[0]] = node;
-        edges.push({ a: section, b: node, len: 62, k: 0.05, section: i });
+        if (!byTarget[leaf[1]]) byTarget[leaf[1]] = node;
+        edges.push({ a: section, b: node, section: i });
       });
     });
     CROSS.forEach(function (pair) {
-      edges.push({ a: byLabel[pair[0]], b: byLabel[pair[1]], len: 130, k: 0.0012, cross: true });
+      edges.push({ a: byLabel[pair[0]], b: byLabel[pair[1]], cross: true });
     });
-    nodes.forEach(function (n, i) { n.phase = i * 1.7; });
+    // The rest of the index: an even lattice of faint points on the sphere
+    var MESH = 96;
+    for (var m = 0; m < MESH; m++) {
+      var y = 1 - (m + 0.5) * 2 / MESH, ring = Math.sqrt(1 - y * y), phi = m * 2.399963;
+      mesh.push(make("mesh", [Math.cos(phi) * ring, y, Math.sin(phi) * ring], R, {}));
+    }
+    mesh.forEach(function (a, i) {
+      mesh.map(function (b, j) {
+        return [(a.p[0] - b.p[0]) * (a.p[0] - b.p[0]) + (a.p[1] - b.p[1]) * (a.p[1] - b.p[1]) + (a.p[2] - b.p[2]) * (a.p[2] - b.p[2]), j];
+      }).sort(function (p, q) { return p[0] - q[0]; }).slice(1, 3).forEach(function (near) {
+        if (near[1] > i) meshEdges.push([a, mesh[near[1]]]);
+      });
+    });
+
+    // The retrieval that accompanies the typed question
+    var workNode = anchors.filter(function (a) { return a.dataset.node === "work"; })[0].node;
+    var route = [[centre, workNode], [workNode, byLabel["Document QA Agent"]],
+                 [workNode, byLabel["Maintenance RAG"]], [workNode, byLabel["Skin analysis"]]];
+    var HOP = 430;
 
     var heat = anchors.map(function () { return 0; });
-    var w = 0, h = 0, scale = 1, ox = 0, oy = 0;
-    var active = -1, hovered = null, dragging = null, moved = false, suppressClick = false;
-    var visible = true, frameId = 0, born = 0, lastPulse = 0, ticks = 0;
+    var w = 0, h = 0, scale = 1;
+    var yaw = -0.9, pitch = -0.2, spin = 0.004, spinP = 0;
+    var active = -1, hovered = null, spot = null, drag = null, suppressClick = false;
+    var visible = true, frameId = 0, born = 0;
 
     function layout() {
       var rect = canvas.getBoundingClientRect();
@@ -107,51 +152,36 @@
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      scale = Math.min(w / GW, h / GH);
-      ox = (w - GW * scale) / 2;
-      oy = (h - GH * scale) / 2;
+      scale = Math.min(w, h) / SIZE;
     }
 
-    function step(t) {
-      var i, j, a, b, dx, dy, d, f;
-      for (i = 0; i < nodes.length; i++) {
-        a = nodes[i];
-        for (j = i + 1; j < nodes.length; j++) {
-          b = nodes[j];
-          dx = b.x - a.x; dy = b.y - a.y;
-          d = Math.max(Math.sqrt(dx * dx + dy * dy), 10);
-          f = 620 * a.charge * b.charge / (d * d);
-          dx /= d; dy /= d;
-          a.vx -= dx * f; a.vy -= dy * f;
-          b.vx += dx * f; b.vy += dy * f;
-        }
-      }
-      edges.forEach(function (e) {
-        dx = e.b.x - e.a.x; dy = e.b.y - e.a.y;
-        d = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
-        f = (d - e.len) * e.k;
-        dx /= d; dy /= d;
-        e.a.vx += dx * f; e.a.vy += dy * f;
-        e.b.vx -= dx * f; e.b.vy -= dy * f;
-      });
-      centre.vx += (CX - centre.x) * 0.09;
-      centre.vy += (CY - centre.y) * 0.09;
-      nodes.forEach(function (n) {
-        if (n === dragging) { n.vx = 0; n.vy = 0; return; }
-        n.vx += (CX - n.x) * 0.0016 + Math.sin(t * 0.7 + n.phase) * 0.028;   // keeps it gently alive
-        n.vy += (CY - n.y) * 0.0016 + Math.cos(t * 0.6 + n.phase) * 0.028;
-        n.vx *= 0.8; n.vy *= 0.8;
-        var speed = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
-        if (speed > 7) { n.vx *= 7 / speed; n.vy *= 7 / speed; }
-        n.x += n.vx; n.y += n.vy;
-        var padX = n.kind === "section" ? 36 : 12, padY = n.kind === "section" ? 16 : 12;
-        n.x = Math.max(padX, Math.min(GW - padX, n.x));
-        n.y = Math.max(padY, Math.min(GH - padY, n.y));
-      });
+    function project(n, grow) {
+      var cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+      var x = n.p[0] * grow, y = n.p[1] * grow, z = n.p[2] * grow;
+      var x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
+      var y2 = y * cp - z1 * sp, z2 = y * sp + z1 * cp;
+      n.k = FOCAL / (FOCAL - z2);
+      n.sx = w / 2 + x1 * n.k * scale;
+      n.sy = h / 2 + y2 * n.k * scale;
+      n.z = z2;
     }
 
-    function px(n) { return ox + n.x * scale; }
-    function py(n) { return oy + n.y * scale; }
+    // Turn towards a node so that it faces the visitor
+    function face(n, rate) {
+      var frontYaw = Math.atan2(-n.p[0], n.p[2]);
+      var z1 = -n.p[0] * Math.sin(frontYaw) + n.p[2] * Math.cos(frontYaw);
+      // Not dead centre: up and to the right, clear of the centre node
+      var wantYaw = frontYaw + 0.5;
+      var wantPitch = Math.max(-0.9, Math.min(0.9, Math.atan2(n.p[1], z1) + 0.36));
+      var dy = wantYaw - yaw;
+      dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+      yaw += dy * rate;
+      pitch += (wantPitch - pitch) * rate;
+    }
+
+    function depth(n) {            // 0 at the back, 1 at the front
+      return Math.max(0, Math.min(1, (n.z / OUTER + 1) / 2));
+    }
 
     function setActive(section) {
       if (section === active) return;
@@ -159,110 +189,196 @@
       anchors.forEach(function (a, i) { a.classList.toggle("on", i === section); });
     }
 
-    function draw(now, settled) {
-      var t = settled ? 99 : (now - born) / 1000;
+    function draw(now, still) {
+      var t = now - born;
       var i, e, n;
-      if (!settled) { step(t); ticks += 1; }
+      var grow = still ? 1 : 1 - Math.pow(1 - Math.min(1, t / 1300), 3);      // expands from the centre
+      var shown = still ? 1 : Math.min(1, t / 700);
+      var retrieving = !still && timing && t >= timing.start && t < timing.end;
+      var hop = retrieving ? (t - timing.start) / HOP : -1;
 
-      // Until the visitor points at something, light the sections up in turn
-      if (!settled && !hovered && !dragging && t > 2.4) setActive(Math.floor((t - 2.4) / 2.4) % anchors.length);
+      if (!still && !drag) {
+        if (retrieving) {
+          face(workNode, 0.06);
+        } else if (spot) {
+          face(spot, 0.07);
+        } else {
+          spin += ((hovered ? 0 : 0.004) - spin) * 0.05;
+          spinP *= 0.92;
+          yaw += spin;
+          pitch += spinP + (-0.2 - pitch) * 0.01;
+        }
+      }
+      pitch = Math.max(-1.2, Math.min(1.2, pitch));
 
+      nodes.forEach(function (node) { project(node, grow); });
+      mesh.forEach(function (node) { project(node, grow); });
+
+      // Light the section in focus: the one pointed at, cited, or facing the visitor
+      if (retrieving) {
+        setActive(workNode.section);
+      } else if (spot) {
+        setActive(spot.section);
+      } else if (hovered && hovered.section >= 0) {
+        setActive(hovered.section);
+      } else if (!drag || active < 0) {
+        var front = anchors[0].node;
+        anchors.forEach(function (a) { if (a.node.z > front.z + (a.node.section === active ? 0 : 14)) front = a.node; });
+        if (active < 0 || anchors[active].node.z < front.z - 14) setActive(front.section);
+      }
       for (i = 0; i < heat.length; i++) {
         var goal = i === active ? 1 : 0;
-        heat[i] = settled ? goal : heat[i] + (goal - heat[i]) * 0.12;
+        heat[i] = still ? goal : heat[i] + (goal - heat[i]) * 0.12;
       }
       var anyHeat = Math.max.apply(null, heat);
-      var shown = settled ? 1 : Math.max(0, Math.min(1, (t - 0.25) / 0.9));
 
       anchors.forEach(function (a) {
-        a.style.setProperty("--tx", px(a.node).toFixed(1) + "px");
-        a.style.setProperty("--ty", py(a.node).toFixed(1) + "px");
+        var s = a.node, d = depth(s);
+        a.style.setProperty("--tx", s.sx.toFixed(1) + "px");
+        a.style.setProperty("--ty", s.sy.toFixed(1) + "px");
+        a.style.setProperty("--grow", (s.k * (0.72 + 0.28 * d) * (s.section === active ? 1.08 : 1) * Math.max(grow, 0.3)).toFixed(3));
+        a.style.opacity = ((s.section === active ? 1 : 0.1 + 0.9 * d * d) * shown).toFixed(3);   // the far side recedes
+        a.style.zIndex = String(10 + Math.round(d * 10));
       });
 
       ctx.clearRect(0, 0, w, h);
+      ctx.lineCap = "round";
+
+      // The faint mesh
+      ctx.lineWidth = 1;
+      for (i = 0; i < meshEdges.length; i++) {
+        var ma = meshEdges[i][0], mb = meshEdges[i][1];
+        ctx.strokeStyle = "rgba(" + SLATE + "," + ((0.03 + 0.1 * depth(ma)) * shown).toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.moveTo(ma.sx, ma.sy);
+        ctx.lineTo(mb.sx, mb.sy);
+        ctx.stroke();
+      }
+      for (i = 0; i < mesh.length; i++) {
+        n = mesh[i];
+        ctx.fillStyle = "rgba(" + SLATE + "," + ((0.1 + 0.3 * depth(n)) * shown).toFixed(3) + ")";
+        ctx.beginPath();
+        ctx.arc(n.sx, n.sy, 1.5 * n.k * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       // Links
       for (i = 0; i < edges.length; i++) {
         e = edges[i];
         var hot = e.cross ? Math.max(heat[e.a.section], heat[e.b.section]) * 0.6 : heat[e.section];
-        var base = e.cross ? 0.09 : 0.3;
-        var alpha = (base - base * 0.45 * (anyHeat - hot) + 0.5 * hot) * shown;
+        var d2 = (depth(e.a) + depth(e.b)) / 2;
+        var base = (e.cross ? 0.08 : 0.26) * (0.45 + 0.55 * d2);
+        var alpha = (base - base * 0.4 * (anyHeat - hot) + 0.5 * hot * (0.5 + 0.5 * d2)) * shown;
         ctx.strokeStyle = "rgba(" + (hot > 0.2 ? TEAL : SLATE) + "," + alpha.toFixed(3) + ")";
-        ctx.lineWidth = e.cross ? 1 : 1.3;
-        if (e.cross) ctx.setLineDash([3, 4]); else ctx.setLineDash([]);
+        ctx.lineWidth = e.cross ? 1 : 1.4;
+        ctx.setLineDash(e.cross ? [3, 4] : []);
         ctx.beginPath();
-        ctx.moveTo(px(e.a), py(e.a));
-        ctx.lineTo(px(e.b), py(e.b));
+        ctx.moveTo(e.a.sx, e.a.sy);
+        ctx.lineTo(e.b.sx, e.b.sy);
         ctx.stroke();
       }
       ctx.setLineDash([]);
 
-      // Signals travelling outwards along the links
-      if (!settled && shown >= 1) {
-        if (now - lastPulse > 150 && pulses.length < 16) {
-          lastPulse = now;
-          var pool = edges.filter(function (ed) { return !ed.cross && (active < 0 || ed.section === active || Math.random() < 0.25); });
-          pulses.push({ edge: pool[Math.floor(Math.random() * pool.length)], t: 0 });
-        }
-        for (i = pulses.length - 1; i >= 0; i--) {
-          var pulse = pulses[i];
-          pulse.t += 0.028;
-          if (pulse.t >= 1) { pulses.splice(i, 1); continue; }
-          ctx.fillStyle = "rgba(" + TEAL + "," + (0.95 * Math.sin(pulse.t * Math.PI)).toFixed(3) + ")";
+      // Idle signals running outwards
+      if (!still && !retrieving && shown >= 1) {
+        for (i = 0; i < edges.length; i++) {
+          e = edges[i];
+          if (e.cross) continue;
+          var lit = e.section === active;
+          var cycle = ((t / (lit ? 1100 : 2600)) + i * 0.37) % 1;
+          if (!lit && (i * 7 + Math.floor(t / 2600)) % 3) continue;
+          ctx.fillStyle = "rgba(" + TEAL + "," + (0.9 * Math.sin(cycle * Math.PI) * (0.4 + 0.6 * depth(e.b))).toFixed(3) + ")";
           ctx.beginPath();
-          ctx.arc(px(pulse.edge.a) + (px(pulse.edge.b) - px(pulse.edge.a)) * pulse.t,
-                  py(pulse.edge.a) + (py(pulse.edge.b) - py(pulse.edge.a)) * pulse.t, 2.3, 0, Math.PI * 2);
+          ctx.arc(e.a.sx + (e.b.sx - e.a.sx) * cycle, e.a.sy + (e.b.sy - e.a.sy) * cycle, 2.2, 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
-      // Leaf nodes and, for the active section, their names
+      // The retrieval path
+      if (retrieving) {
+        ctx.shadowColor = "rgba(" + TEAL + ",0.9)";
+        for (i = 0; i < route.length; i++) {
+          var progress = Math.max(0, Math.min(1, hop - i));
+          if (progress <= 0) continue;
+          var from = route[i][0], to = route[i][1];
+          var hx = from.sx + (to.sx - from.sx) * progress, hy = from.sy + (to.sy - from.sy) * progress;
+          ctx.shadowBlur = 10;
+          ctx.strokeStyle = "rgba(" + TEAL + ",0.95)";
+          ctx.lineWidth = 2.6;
+          ctx.beginPath();
+          ctx.moveTo(from.sx, from.sy);
+          ctx.lineTo(hx, hy);
+          ctx.stroke();
+          if (progress < 1) {
+            ctx.shadowBlur = 18;
+            ctx.fillStyle = "rgba(" + TEAL + ",1)";
+            ctx.beginPath();
+            ctx.arc(hx, hy, 4.2, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (to.flash < timing.start) {
+            to.flash = t;                       // arrived: this node has been retrieved
+          }
+        }
+        ctx.shadowBlur = 0;
+      }
+
+      // Leaf nodes and, for the section in focus, their names
+      var leaves = nodes.filter(function (node) { return node.kind === "leaf"; }).sort(function (p, q) { return p.z - q.z; });
       ctx.font = "600 " + Math.max(11.5, 13 * Math.min(scale, 1.05)).toFixed(1) + "px 'Source Sans 3', system-ui, sans-serif";
       ctx.textBaseline = "middle";
-      for (i = 0; i < nodes.length; i++) {
-        n = nodes[i];
-        if (n.kind !== "leaf") continue;
-        var nh = heat[n.section];
-        var x = px(n), y = py(n);
-        var isHovered = n === hovered || n === dragging;
-        var dim = 0.6 - 0.25 * (anyHeat - nh);
-        ctx.fillStyle = nh > 0.02
-          ? "rgba(" + TEAL + "," + ((dim + (1 - dim) * nh) * shown).toFixed(3) + ")"
+      for (i = 0; i < leaves.length; i++) {
+        n = leaves[i];
+        var nh = heat[n.section], dn = depth(n);
+        var cited = retrieving && n.flash >= timing.start;
+        var focus = n === hovered || n === spot || cited;
+        var dim = (0.5 - 0.2 * (anyHeat - nh)) * (0.4 + 0.6 * dn);
+        ctx.fillStyle = (nh > 0.02 || cited)
+          ? "rgba(" + TEAL + "," + (Math.min(1, dim + (1 - dim) * Math.max(nh, cited ? 1 : 0)) * shown).toFixed(3) + ")"
           : "rgba(" + SLATE + "," + (dim * shown).toFixed(3) + ")";
         ctx.beginPath();
-        ctx.arc(x, y, (n.r + 1.6 * nh + (isHovered ? 1.5 : 0)) * Math.max(scale, 0.85), 0, Math.PI * 2);
+        ctx.arc(n.sx, n.sy, (4 + 1.6 * nh + (focus ? 1.8 : 0)) * n.k * Math.max(scale, 0.85), 0, Math.PI * 2);
         ctx.fill();
-        if (nh > 0.05) {
+        var since = (t - n.flash) / 900;
+        if (focus && (n === spot || (since >= 0 && since < 1))) {
+          var ringT = n === spot ? (t % 1200) / 1200 : since;
+          ctx.strokeStyle = "rgba(" + TEAL + "," + (0.7 * (1 - ringT)).toFixed(3) + ")";
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.arc(n.sx, n.sy, 6 + ringT * 20, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        var named = Math.max(nh, cited ? 1 : 0);
+        if (named > 0.05) {
           var parent = anchors[n.section].node;
-          var right = n.x >= parent.x;
+          var right = n.sx >= parent.sx;
           var tw = ctx.measureText(n.label).width;
-          if (right && x + 9 + tw > w - 3) right = false;       // no room: flip to the other side
-          if (!right && x - 9 - tw < 3) right = true;
-          var tx = right ? x + 9 : x - 9 - tw;
-          tx = Math.max(3, Math.min(w - tw - 3, tx));
-          ctx.fillStyle = "rgba(250,246,236," + (0.85 * nh).toFixed(3) + ")";
-          ctx.fillRect(tx - 3, y - 9, tw + 6, 18);
-          ctx.fillStyle = "rgba(" + (isHovered ? TEAL : "35,41,43") + "," + nh.toFixed(3) + ")";
-          ctx.fillText(n.label, tx, y + 0.5);
+          if (right && n.sx + 10 + tw > w - 3) right = false;     // no room: flip to the other side
+          if (!right && n.sx - 10 - tw < 3) right = true;
+          var tx = right ? n.sx + 10 : n.sx - 10 - tw;
+          var la = named * (0.35 + 0.65 * dn);
+          ctx.fillStyle = "rgba(250,246,236," + (0.85 * la).toFixed(3) + ")";
+          ctx.fillRect(tx - 3, n.sy - 9, tw + 6, 18);
+          ctx.fillStyle = "rgba(" + (focus ? TEAL : INK) + "," + la.toFixed(3) + ")";
+          ctx.fillText(n.label, tx, n.sy + 0.5);
         }
       }
 
       // Centre node
-      var cr = centre.r * Math.max(scale, 0.85);
-      var beat = settled ? 0 : (t % 2.4) / 2.4;
+      var cr = 20 * centre.k * Math.max(scale, 0.85) * Math.max(grow, 0.4);
+      var beat = still ? 0.3 : (t % 2400) / 2400;
       ctx.strokeStyle = "rgba(" + TEAL + "," + (0.4 * (1 - beat) * shown).toFixed(3) + ")";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(px(centre), py(centre), cr + beat * 20, 0, Math.PI * 2);
+      ctx.arc(centre.sx, centre.sy, cr + beat * 20, 0, Math.PI * 2);
       ctx.stroke();
       ctx.fillStyle = "rgba(" + TEAL + "," + shown.toFixed(3) + ")";
       ctx.beginPath();
-      ctx.arc(px(centre), py(centre), cr, 0, Math.PI * 2);
+      ctx.arc(centre.sx, centre.sy, cr, 0, Math.PI * 2);
       ctx.fill();
       ctx.fillStyle = "rgba(255,253,247," + shown.toFixed(3) + ")";
       ctx.font = "650 " + (15 * Math.max(scale, 0.85)).toFixed(1) + "px 'Schibsted Grotesk', system-ui, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("WH", px(centre), py(centre) + 1);
+      ctx.fillText("WH", centre.sx, centre.sy + 1);
       ctx.textAlign = "start";
     }
 
@@ -286,88 +402,95 @@
     }
 
     function nodeAt(event) {
+      var link = event.target.closest ? event.target.closest("a[data-node]") : null;
+      if (link) return link.node;
       var rect = canvas.getBoundingClientRect();
       var x = event.clientX - rect.left, y = event.clientY - rect.top;
-      var best = null, bestD = Infinity;
+      var best = null, score = Infinity;
       nodes.forEach(function (n) {
-        var reach = (n.kind === "leaf" ? 15 : n.kind === "section" ? 34 : 26);
-        var d = Math.sqrt((px(n) - x) * (px(n) - x) + (py(n) - y) * (py(n) - y));
-        if (d < reach && d < bestD) { best = n; bestD = d; }
+        if (n.kind === "section") return;
+        var reach = n.kind === "leaf" ? 16 : 24;
+        var d = Math.sqrt((n.sx - x) * (n.sx - x) + (n.sy - y) * (n.sy - y));
+        if (d < reach && d - n.z * 0.05 < score) { best = n; score = d - n.z * 0.05; }   // prefer the nearer side
       });
-      return { node: best, gx: (x - ox) / scale, gy: (y - oy) / scale };
-    }
-
-    function point(node) {
-      hovered = node;
-      if (node && node.section >= 0) setActive(node.section);
-      else if (reduce && !node) setActive(-1);
-      nav.style.cursor = node ? (dragging ? "grabbing" : "pointer") : "";
-      redraw();
+      return best;
     }
 
     function go(node) {
       if (node.kind === "section") { node.el.click(); return; }
-      if (node.kind === "centre") { window.location.hash = "#top"; return; }
-      window.location.hash = "#" + node.target;
+      window.location.hash = "#" + (node.kind === "centre" ? "top" : node.target);
     }
 
-    anchors.forEach(function (a) { a.node = nodes.filter(function (n) { return n.el === a; })[0]; });
-
     nav.addEventListener("pointerdown", function (event) {
-      var hit = nodeAt(event);
-      if (!hit.node || reduce) return;
-      dragging = hit.node;
-      moved = false;
-      dragging.grabX = hit.gx; dragging.grabY = hit.gy;
+      if (event.button) return;
+      drag = { x: event.clientX, y: event.clientY, node: nodeAt(event), moved: false };
       nav.setPointerCapture(event.pointerId);
-      nav.style.cursor = "grabbing";
     });
     nav.addEventListener("pointermove", function (event) {
-      var hit = nodeAt(event);
-      if (dragging) {
-        if (Math.abs(hit.gx - dragging.grabX) + Math.abs(hit.gy - dragging.grabY) > 6) moved = true;
-        if (moved) {
-          dragging.x = Math.max(10, Math.min(GW - 10, hit.gx));
-          dragging.y = Math.max(10, Math.min(GH - 10, hit.gy));
+      if (drag) {
+        var dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+        if (!drag.moved && Math.abs(dx) + Math.abs(dy) > 6) drag.moved = true;
+        if (drag.moved) {
+          spin = dx * 0.008;
+          spinP = -dy * 0.006;
+          yaw += spin;
+          pitch += spinP;
+          drag.x = event.clientX; drag.y = event.clientY;
+          nav.classList.add("turning");
+          redraw();
         }
         return;
       }
-      point(hit.node);
+      hovered = nodeAt(event);
+      nav.style.cursor = hovered ? "pointer" : "";
+      redraw();
     });
     function release(event) {
-      if (!dragging) return;
-      var node = dragging;
-      dragging = null;
-      nav.style.cursor = "";
-      if (moved) {
-        suppressClick = true;                    // a drag is not a click
+      if (!drag) return;
+      var was = drag;
+      drag = null;
+      nav.classList.remove("turning");
+      if (was.moved) {
+        suppressClick = true;                    // a spin is not a click
         setTimeout(function () { suppressClick = false; }, 60);
-      } else if (event.type === "pointerup") {
+      } else if (event.type === "pointerup" && was.node) {
         // Pointer capture retargets the click to the container, so follow
         // the node's link here instead of relying on the native click.
-        go(node);
+        go(was.node);
       }
     }
     nav.addEventListener("pointerup", release);
     nav.addEventListener("pointercancel", release);
     nav.addEventListener("pointerleave", function () {
-      if (dragging) return;
-      point(null);
-      born = performance.now() - 2400;           // resume the tour from the first section
+      if (drag) return;
+      hovered = null;
+      redraw();
     });
     nav.addEventListener("click", function (event) {
       if (suppressClick) { event.preventDefault(); event.stopPropagation(); }
     }, true);
     anchors.forEach(function (a) {
-      a.addEventListener("focus", function () { point(a.node); });
-      a.addEventListener("blur", function () { point(null); });
+      a.addEventListener("focus", function () { spot = a.node; redraw(); });
+      a.addEventListener("blur", function () { spot = null; redraw(); });
       a.addEventListener("dragstart", function (event) { event.preventDefault(); });
+    });
+
+    // The Sources on the left point at their nodes on the sphere
+    document.querySelectorAll(".retrieved a").forEach(function (chip) {
+      var node = byTarget[chip.getAttribute("href").slice(1)];
+      if (!node) return;
+      function on() { spot = node; if (reduce) { face(node, 1); redraw(); } }
+      function off() { spot = null; redraw(); }
+      chip.addEventListener("pointerenter", on);
+      chip.addEventListener("pointerleave", off);
+      chip.addEventListener("focus", on);
+      chip.addEventListener("blur", off);
     });
 
     layout();
     born = performance.now();
     if (reduce) {
-      for (var s = 0; s < 400; s++) step(0);    // settle without showing the motion
+      face(workNode, 1);
       draw(0, true);
     } else {
       start();
@@ -393,7 +516,7 @@
   }
 
   var graphNav = document.querySelector(".graph");
-  if (graphNav) graph(graphNav);
+  if (graphNav) graph(graphNav, retrieval);
 
   /* ---------- Pipelines and results run when scrolled into view ---------- */
 

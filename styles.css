@@ -169,7 +169,7 @@ main > section {
   min-width: 0;
 }
 
-/* The knowledge graph: the page as nodes that can be dragged */
+/* The knowledge graph: the page as a sphere of nodes that can be spun */
 
 .graph {
   position: relative;
@@ -206,7 +206,9 @@ main > section {
 
 /* With the script running, the links become nodes placed by the simulation */
 .js .graph {
-  aspect-ratio: 400 / 360;
+  aspect-ratio: 1;
+  max-width: 30rem;
+  cursor: grab;
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
@@ -225,14 +227,19 @@ main > section {
   left: 0;
   top: 0;
   transform: translate(calc(var(--tx, 0px) - 50%), calc(var(--ty, 0px) - 50%)) scale(var(--grow, 1));
-  cursor: grab;
+  cursor: pointer;
+  will-change: transform, opacity;
   -webkit-user-drag: none;
+}
+
+.js .graph.turning,
+.js .graph.turning a {
+  cursor: grabbing;
 }
 
 .js .graph a.on,
 .js .graph a:hover,
 .js .graph a:focus-visible {
-  --grow: 1.08;
   color: var(--paper);
   background: var(--teal);
   border-color: var(--teal);
@@ -753,9 +760,10 @@ h3 {
     padding-top: 1.25rem;
   }
 
-  .graph {
+  .graph,
+  .js .graph {
     order: -1;
-    max-width: 21rem;
+    max-width: 20rem;
   }
 
   .graph a {

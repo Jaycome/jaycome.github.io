@@ -16,8 +16,9 @@ experience, skills and contact details. Content mirrors the resume in `assets/re
 
 - Milk-white background, charcoal text, one teal accent shared with the resume
 - Schibsted Grotesk for headings, Source Sans 3 for text, both self-hosted (OFL-1.1)
-- The summary cites its case studies the way a RAG answer cites sources
-- Motion: a load sequence that grounds the summary in its sources, pipelines that run as they scroll into view, and result counters. All of it is off under `prefers-reduced-motion`
+- The landing screen plays out a retrieval-augmented answer: a question is typed, the resume summary streams in, and its sources attach as links to the case studies
+- Behind it, a canvas field of drifting points shows nearest-neighbour retrieval. The query point links to its five closest points and follows the pointer
+- Pipelines run step by step as they scroll into view and result figures count up. All motion is off under `prefers-reduced-motion`
 - Plain HTML and CSS with one small optional script: no build step, no external requests, and the page is complete without JavaScript
 
 ## Project Structure

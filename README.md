@@ -8,9 +8,10 @@ A responsive personal portfolio website built with HTML, CSS, and JavaScript, de
 
 ## Overview
 
-A single-page portfolio for AI software engineering roles. It presents two case studies
-(a multimodal document Q&A agent and an equipment maintenance RAG system), earlier work,
-experience, skills and contact details. Content mirrors the resume in `assets/resume.pdf`.
+A single-page portfolio for AI software engineering roles. Selected work holds three case
+studies from employment (a multimodal document Q&A agent, an equipment maintenance RAG system
+and an AI skin-analysis product). Projects holds personal and academic work. Experience,
+skills and contact details follow. Work content mirrors the resume in `assets/resume.pdf`.
 
 ## Design
 

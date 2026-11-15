@@ -24,6 +24,7 @@
     <a class="masthead-name" href="#top">Wei-Chieh Huang</a>
     <nav aria-label="Sections">
       <a href="#work">Work</a>
+      <a href="#projects">Projects</a>
       <a href="#experience">Experience</a>
       <a href="#skills">Skills</a>
       <a href="#contact">Contact</a>
@@ -155,47 +156,97 @@
         </div>
         <p class="stack">BM25, dense retrieval, RRF, vLLM, Azure OpenAI, Docker, GitLab CI/CD</p>
       </article>
+
+      <article id="skin-analysis" class="case">
+        <header class="case-head">
+          <span class="case-no" aria-hidden="true">3</span>
+          <div>
+            <h3>AI skin-analysis product</h3>
+            <p class="case-meta">Jubilee International Biomedical Co., Ltd. 2024 to 2026</p>
+          </div>
+        </header>
+
+        <p class="case-lede">
+          A skin-analysis system taken from definition and proof of concept to a demonstration at the
+          2026 American Academy of Dermatology Annual Meeting.
+        </p>
+
+        <div class="case-body">
+          <ul class="built">
+            <li>Defined the system across eight assessment metrics, from analysis-to-recommendation workflows to UI prototypes and specifications.</li>
+            <li>Delivered a YOLO-based acne detection proof of concept for the investor presentations that helped the team secure Series A funding.</li>
+            <li>Proposed client-side image tiling and streaming uploads to shorten the analysis wait, coordinated the vendor’s implementation and validated the result.</li>
+            <li>Ran acceptance testing ahead of the conference demonstration.</li>
+          </ul>
+          <dl class="results">
+            <div>
+              <dt>Analysis wait time</dt>
+              <dd><span data-count="75">75</span>% shorter</dd>
+            </div>
+          </dl>
+        </div>
+        <p class="stack">Product definition, YOLO, proof of concept, vendor integration, acceptance testing</p>
+      </article>
     </section>
 
-    <section class="band" aria-labelledby="earlier-title">
-      <h2 class="band-title" id="earlier-title">Earlier work</h2>
+    <section id="projects" class="band">
+      <h2 class="band-title">Projects</h2>
 
-      <div class="earlier">
-        <article id="skin-analysis" class="earlier-item">
-          <header class="case-head">
-            <span class="case-no" aria-hidden="true">3</span>
-            <div>
-              <h3>AI skin-analysis product</h3>
-              <p class="case-meta">Jubilee International Biomedical Co., Ltd. 2024 to 2026</p>
+      <div class="projects">
+        <article class="project lead">
+          <h3>Harness, a personal assistant that lives in Telegram</h3>
+          <p class="case-meta">Personal project, 2026. Private repository, code walkthrough on request</p>
+
+          <div class="case-body">
+            <div class="project-text">
+              <p>
+                A resident assistant for one user. One module watches US equities from a small cloud VM and
+                sends a morning brief with a news digest, hourly updates and threshold alerts. The other
+                triages mail on my own Mac with a local model, so no message reaches a cloud LLM.
+              </p>
+              <p>
+                The design targets silent failures, where the system keeps running and the output looks
+                plausible but is wrong. Each one is written down as a numbered hard rule that the code and
+                tests cite. A free-text answer that contains a number, for example, is withheld, and the
+                user is pointed to the command that reads the real figure.
+              </p>
+              <p>
+                I chose the triage model by blind-labelling 59 of my own mails and comparing three
+                model and prompt setups against a bar of zero missed important mail.
+              </p>
             </div>
-          </header>
-          <p>
-            Defined a skin-analysis system covering eight assessment metrics, from analysis-to-recommendation
-            workflows to UI prototypes and specifications. A YOLO-based acne detection proof of concept fed the
-            investor presentations that helped the team secure Series A funding. I proposed client-side image
-            tiling and streaming uploads, which cut the analysis wait time by 75%, and ran acceptance testing
-            ahead of the system’s demonstration at the 2026 American Academy of Dermatology Annual Meeting.
-          </p>
+            <dl class="results">
+              <div>
+                <dt>Important-mail agreement with my labels</dt>
+                <dd class="decimal">0.949</dd>
+              </div>
+              <div>
+                <dt>Important mails missed</dt>
+                <dd>0 <span class="to">of 19</span></dd>
+              </div>
+            </dl>
+          </div>
+          <p class="stack">Python, PostgreSQL, Alembic, APScheduler, Telegram Bot API, Gemini API, ollama, Docker Compose, GCP</p>
         </article>
 
-        <article class="earlier-item">
-          <h3>Reinforcement learning for the board game Calico</h3>
+        <article class="project">
+          <h3>Calico with Monte Carlo Tree Search</h3>
           <p class="case-meta">MSc project, King’s College London</p>
           <p>
-            MCTS, Expectimax and Q-Learning agents for a non-deterministic board game, compared on
-            performance and exploration behaviour in simulation.
+            MCTS agents for the board game Calico, comparing two evaluation strategies across
+            thinking-time budgets and exploration constants.
           </p>
           <p><a class="text-link" href="https://github.com/Jaycome/Calico-with-MCTS">View the code on GitHub</a></p>
         </article>
 
-        <article class="earlier-item">
-          <h3>Barcode, a domain-specific modelling language</h3>
-          <p class="case-meta">MSc project, King’s College London</p>
+        <article class="project">
+          <h3>tw50-quant-data</h3>
+          <p class="case-meta">Personal project, updated every weekday</p>
           <p>
-            A Java-based DSML for automated cocktail preparation with textual syntax, model
-            transformation, validation, auto-correction and JUnit model verification.
+            Dividend-adjusted daily prices for the Taiwan 50 constituents, refreshed by a scheduled
+            GitHub Actions workflow and kept as a dataset for backtesting.
           </p>
-          <p><a class="text-link" href="https://github.com/Jaycome/barcode_dsml">View the code on GitHub</a></p>
+          <p><a class="text-link" href="https://github.com/Jaycome/tw50-quant-data">View the data on GitHub</a></p>
         </article>
       </div>
     </section>

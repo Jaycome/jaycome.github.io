@@ -8,25 +8,16 @@ A responsive personal portfolio website built with HTML, CSS, and JavaScript, de
 
 ## Overview
 
-This website serves as my professional portfolio for software engineering, AI application engineering, and full-stack roles. It highlights my selected work experience, technical projects, skills, and contact information through a lightweight static website deployed with GitHub Pages.
+A single-page portfolio for AI software engineering roles. It presents two case studies
+(a multimodal document Q&A agent and an equipment maintenance RAG system), earlier work,
+experience, skills and contact details. Content mirrors the resume in `assets/resume.pdf`.
 
-The goal of this project is not only to present my resume online, but also to demonstrate basic software project organisation, clean documentation, and maintainable static-site deployment.
+## Design
 
-## Features
-
-- Responsive layout for desktop and mobile devices
-- Project-focused portfolio sections
-- Professional summary, experience, skills, and contact information
-- Lightweight static deployment via GitHub Pages
-- Custom 404 page
-- Mobile navigation interaction with JavaScript
-
-## Tech Stack
-
-- HTML5
-- CSS3
-- JavaScript
-- GitHub Pages
+- Milk-white background, charcoal text, one teal accent shared with the resume
+- Schibsted Grotesk for headings, Source Sans 3 for text, both self-hosted (OFL-1.1)
+- The summary cites its case studies the way a RAG answer cites sources
+- Plain HTML and CSS: no JavaScript, no build step, no external requests
 
 ## Project Structure
 
@@ -34,8 +25,16 @@ The goal of this project is not only to present my resume online, but also to de
 .
 ├── index.html
 ├── styles.css
-├── script.js
 ├── 404.html
+├── assets/
+│   ├── resume.pdf
+│   └── fonts/
 ├── README.md
 ├── LICENSE
 └── .gitignore
+```
+
+## Updating
+
+Edit `index.html` and push to `main`; GitHub Pages redeploys automatically.
+Replace `assets/resume.pdf` to update the downloadable resume.

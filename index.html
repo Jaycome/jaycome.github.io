@@ -3,223 +3,285 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wei-Chieh Huang | AI & Full-Stack Engineer</title>
-  <meta name="description" content="Wei-Chieh Huang — AI and Full-Stack Engineer specialising in practical AI systems, app integration, IoT-enabled products, and enterprise system deployment." />
-  <meta property="og:title" content="Wei-Chieh Huang | AI & Full-Stack Engineer" />
-  <meta property="og:description" content="Portfolio website for AI systems, full-stack development, IoT products, and enterprise integration." />
+  <title>Wei-Chieh Huang | AI Software Engineer</title>
+  <meta name="description" content="Wei-Chieh Huang is an AI software engineer building enterprise RAG, multimodal document Q&amp;A and on-premises LLM systems." />
+  <meta property="og:title" content="Wei-Chieh Huang | AI Software Engineer" />
+  <meta property="og:description" content="Enterprise RAG, multimodal document Q&amp;A and on-premises LLM deployment, from proof of concept to delivery." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://jaycome.github.io/" />
+  <meta name="theme-color" content="#FAF6EC" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230F6D73'/%3E%3Cpath d='M7 10l4 12 5-9 5 9 4-12' fill='none' stroke='%23FAF6EC' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="preload" href="assets/fonts/schibsted-grotesk-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-  <header class="site-header">
-    <nav class="nav">
-      <a class="logo" href="#top">Wei-Chieh Huang</a>
-      <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
-      <div class="nav-links">
-        <a href="#about">About</a>
-        <a href="#experience">Experience</a>
-        <a href="#projects">Projects</a>
-        <a href="#skills">Skills</a>
-        <a href="#contact">Contact</a>
-      </div>
+  <a class="skip" href="#work">Skip to selected work</a>
+
+  <header class="masthead">
+    <a class="masthead-name" href="#top">Wei-Chieh Huang</a>
+    <nav aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#experience">Experience</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+      <a class="nav-resume" href="assets/resume.pdf" download="Wei-Chieh_Huang_Resume.pdf">Resume</a>
     </nav>
   </header>
 
   <main id="top">
-    <section class="hero">
-      <div class="hero-content">
-        <p class="eyebrow">AI Systems · Full-Stack · Product Engineering</p>
-        <h1>Creating production-ready AI systems and connected software experiences.</h1>
-        <p class="hero-text">
-          I blend AI engineering, full-stack development, and product thinking to turn technical complexity
-          into stable solutions that teams and users can trust.
-        </p>
-        <div class="hero-actions">
-          <a class="btn primary" href="#projects">View Projects</a>
-          <a class="btn secondary" href="assets/resume.pdf" target="_blank" rel="noopener">Download CV</a>
+    <section class="intro">
+      <p class="role">AI software engineer, Taiwan</p>
+      <h1>I build LLM systems that answer from evidence, and say so when there isn’t any.</h1>
+
+      <div class="grounded">
+        <div class="answer">
+          <p>
+            At Elite Material I built a multimodal document Q&amp;A agent that reaches 97% overall answer
+            accuracy and checks document permissions before it retrieves anything&nbsp;<a class="cite" href="#doc-qa" aria-label="Source 1: Multimodal Document QA Agent">1</a>.
+            For equipment maintenance I designed hybrid retrieval that raised Precision@10 from 80% to 95%
+            and halved time to first token&nbsp;<a class="cite" href="#maintenance-rag" aria-label="Source 2: Equipment Maintenance RAG System">2</a>.
+            Before that I spent two years taking an AI skin-analysis product from proof of concept
+            to a conference demonstration&nbsp;<a class="cite" href="#skin-analysis" aria-label="Source 3: AI skin-analysis product">3</a>.
+          </p>
+          <p class="actions">
+            <a class="button" href="#work">Read the case studies</a>
+            <a class="button quiet" href="assets/resume.pdf" download="Wei-Chieh_Huang_Resume.pdf">Download resume (PDF)</a>
+          </p>
         </div>
-      </div>
 
-      <aside class="hero-card" aria-label="Profile highlights">
-        <div class="profile-avatar">WH</div>
-        <h2>Wei-Chieh Huang</h2>
-        <p>AI & Full-Stack Engineer</p>
-        <ul>
-          <li>Translate AI research into stable product workflows and engineering practices.</li>
-          <li>Build connected applications that unify device data, analytics, and user experience.</li>
-          <li>Streamline engineering with automated integration and release pipelines.</li>
-          <li>Partner with product, design, and distributed engineering teams to ship reliable systems.</li>
-        </ul>
-      </aside>
-    </section>
-
-    <section id="about" class="section">
-      <div class="section-heading">
-        <p class="eyebrow">About</p>
-        <h2>Engineer with a product mindset and system-integration experience.</h2>
-      </div>
-      <div class="about-grid">
-        <p>
-          My work sits at the intersection of AI systems, application development, and business operations.
-          I have hands-on experience building deep-learning features, integrating IoT diagnostic devices,
-          designing cross-platform applications, and supporting production system rollouts.
-        </p>
-        <p>
-          I am especially interested in roles where I can connect AI capability with real business needs:
-          improving workflow efficiency, turning data into usable products, and making complex systems easier
-          for internal teams, partners, and users to adopt.
-        </p>
+        <aside class="sources" aria-label="Sources for the summary">
+          <h2>Sources</h2>
+          <ol>
+            <li>
+              <a href="#doc-qa">Multimodal Document QA Agent</a>
+              <span>Elite Material, 2026</span>
+            </li>
+            <li>
+              <a href="#maintenance-rag">Equipment Maintenance RAG System</a>
+              <span>Elite Material, 2026</span>
+            </li>
+            <li>
+              <a href="#skin-analysis">AI skin-analysis product</a>
+              <span>Jubilee International Biomedical, 2024 to 2026</span>
+            </li>
+          </ol>
+        </aside>
       </div>
     </section>
 
-    <section id="experience" class="section">
-      <div class="section-heading">
-        <p class="eyebrow">Experience</p>
-        <h2>Selected professional experience</h2>
-      </div>
+    <section id="work" class="band">
+      <h2 class="band-title">Selected work</h2>
 
-      <div class="timeline">
-        <article class="timeline-item">
-          <div class="timeline-date">Apr 2024 — Present</div>
-          <div class="timeline-content">
-            <h3>AI / Full-Stack Engineer (RDSS)</h3>
-            <p class="muted">Jubilee International Biomedical Co., Ltd</p>
-            <ul>
-              <li>Developed and deployed deep-learning models including R-CNN and YOLOv11 for dermatological image detection.</li>
-              <li>Designed cross-platform Flutter applications for web, iOS, and Android, connecting IoT diagnostic devices with PostgreSQL and Firestore analytics.</li>
-              <li>Collaborated with distributed engineering teams and external partners to debug data pipelines, document integration standards, and support deployment.</li>
-              <li>Automated build and deployment with GitLab CI/CD to improve release consistency and reduce manual effort.</li>
-              <li>Worked with product and UI/UX teams to turn AI outputs into user-facing features with clearer product value.</li>
-            </ul>
+      <article id="doc-qa" class="case">
+        <header class="case-head">
+          <span class="case-no" aria-hidden="true">1</span>
+          <div>
+            <h3>Multimodal Document QA Agent</h3>
+            <p class="case-meta">Elite Material Co., Ltd. On-premises, 2026</p>
           </div>
-        </article>
+        </header>
 
-        <article class="timeline-item">
-          <div class="timeline-date">Sep 2021 — Jan 2022</div>
-          <div class="timeline-content">
-            <h3>Teaching Assistant</h3>
-            <p class="muted">Department of Management Information Systems, National Chiayi University</p>
-            <ul>
-              <li>Guided students in Python programming and supported course project design.</li>
-              <li>Assisted with assessment rubrics to strengthen problem-solving and teamwork skills.</li>
-            </ul>
+        <p class="case-lede">
+          Staff needed answers from internal documents, many of them image-heavy PDFs that text-only
+          retrieval could not read, and each department may only see its own files.
+        </p>
+
+        <ol class="flow" aria-label="How a question is answered">
+          <li><b>Question</b></li>
+          <li><b>Permission check</b><span>Existing authorization API, before retrieval</span></li>
+          <li class="fork"><b>Retrieval</b>
+            <span class="lanes"><i>Vector search</i><i>PageIndex reasoning</i></span>
+          </li>
+          <li><b>Agent</b><span>Reads images with a custom tool, judges whether the evidence is enough</span></li>
+          <li class="end"><b>Answer</b><span>With its sources</span></li>
+        </ol>
+
+        <div class="case-body">
+          <ul class="built">
+            <li>Combined vector retrieval with PageIndex reasoning-driven retrieval, widening the range of documents the system can answer from.</li>
+            <li>Built the agent around a custom image-reading tool, so it calls tools on its own and assesses whether the evidence it has gathered is sufficient.</li>
+            <li>Made retrieval RBAC-aware through the company’s existing authorization API. Document-level permissions apply before retrieval, which makes cross-department access safe.</li>
+          </ul>
+          <dl class="results">
+            <div>
+              <dt>Overall answer accuracy</dt>
+              <dd>97%</dd>
+            </div>
+          </dl>
+        </div>
+        <p class="stack">PageIndex, vector retrieval, tool calling, multimodal RAG, RBAC</p>
+      </article>
+
+      <article id="maintenance-rag" class="case">
+        <header class="case-head">
+          <span class="case-no" aria-hidden="true">2</span>
+          <div>
+            <h3>Equipment Maintenance RAG System</h3>
+            <p class="case-meta">Elite Material Co., Ltd. On-premises with cloud fallback, 2026</p>
           </div>
-        </article>
-      </div>
-    </section>
+        </header>
 
-    <section id="projects" class="section">
-      <div class="section-heading">
-        <p class="eyebrow">Projects</p>
-        <h2>Projects that show AI, systems, and product delivery ability</h2>
-      </div>
-
-      <div class="project-grid">
-        <article class="project-card">
-          <span class="tag">AI / Reinforcement Learning</span>
-          <h3>Reinforcement Learning in Board Game “Calico”</h3>
-          <p>
-            Implemented MCTS, Expectimax, and Q-Learning agents for a non-deterministic board game environment.
-            Evaluated fairness, performance, and exploration-exploitation behaviour under realistic simulation scenarios.
-          </p>
-          <div class="tech">Python · RL · MCTS · Q-Learning · Simulation</div>
-        </article>
-
-        <article class="project-card">
-          <span class="tag">Software Engineering</span>
-          <h3>Barcode — Domain-Specific Modelling Language</h3>
-          <p>
-            Designed a Java-based DSML for automated cocktail preparation, including textual syntax,
-            model transformation, validation, auto-correction, and JUnit-based model verification.
-          </p>
-          <div class="tech">Java · DSML · Model-Driven Development · JUnit</div>
-        </article>
-
-        <article class="project-card">
-          <span class="tag">Health Tech / IoT</span>
-          <h3>Telemedicine System</h3>
-          <p>
-            Co-developed a cross-platform telemedicine system for pilot testing,
-            integrating WebRTC consultation and wearable data tracking through Cloud Firestore.
-          </p>
-          <div class="tech">Flutter · WebRTC · Firebase · Firestore · IoT</div>
-        </article>
-
-        <article class="project-card">
-          <span class="tag">AI Deployment</span>
-          <h3>Dermatological AI Detection System</h3>
-          <p>
-            Built AI-assisted image detection workflows for dermatology use cases, connecting model outputs
-            to product interfaces and analytics pipelines for real-world deployment.
-          </p>
-          <div class="tech">YOLOv11 · R-CNN · PyTorch/TensorFlow · PostgreSQL</div>
-        </article>
-      </div>
-    </section>
-
-    <section id="skills" class="section">
-      <div class="section-heading">
-        <p class="eyebrow">Skills</p>
-        <h2>Technical toolkit</h2>
-      </div>
-
-      <div class="skills-grid">
-        <div class="skill-card">
-          <h3>Languages & Frameworks</h3>
-          <p>Python, Flutter, Java, Swift, C/C++, React, Node.js</p>
-        </div>
-        <div class="skill-card">
-          <h3>AI & Machine Learning</h3>
-          <p>TensorFlow, PyTorch, YOLOv11, R-CNN, Reinforcement Learning, Model Optimization</p>
-        </div>
-        <div class="skill-card">
-          <h3>Systems & DevOps</h3>
-          <p>GitLab CI/CD, Cloud Deployment, API Integration, Automated Troubleshooting, Linux</p>
-        </div>
-        <div class="skill-card">
-          <h3>Data & Product Integration</h3>
-          <p>PostgreSQL, Firebase, Firestore, MongoDB, WebRTC, Device Telemetry, Technical Documentation</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section education">
-      <div class="section-heading">
-        <p class="eyebrow">Education</p>
-        <h2>Education</h2>
-      </div>
-      <div class="education-card">
-        <h3>King’s College London</h3>
-        <p class="muted">MSc Advanced Software Engineering · Sep 2022 — Jan 2024</p>
-        <p>
-          Relevant coursework: Agents and Multi-Agent Systems, Software Measurement and Testing,
-          Big Data Technologies, Security Engineering, Model-Driven Development, Distributed Ledgers and Cryptocurrencies.
+        <p class="case-lede">
+          Maintenance teams needed answers grounded in past maintenance records, served on premises,
+          fast enough to use while the equipment is down.
         </p>
+
+        <ol class="flow" aria-label="How a question is answered">
+          <li><b>Question</b></li>
+          <li class="fork"><b>Hybrid retrieval</b>
+            <span class="lanes"><i>BM25</i><i>Dense vectors</i></span>
+          </li>
+          <li><b>Rank fusion</b><span>Reciprocal Rank Fusion</span></li>
+          <li><b>Relevance scoring</b><span>LLM, pointwise, run concurrently</span></li>
+          <li class="fork end"><b>Confidence routing</b>
+            <span class="lanes"><i>On-premises LLM</i><i>Azure OpenAI when evidence is thin</i></span>
+          </li>
+        </ol>
+
+        <div class="case-body">
+          <ul class="built">
+            <li>Designed hybrid BM25 and dense retrieval merged with Reciprocal Rank Fusion, measured on a 60-question evaluation set.</li>
+            <li>Implemented LLM-based pointwise relevance scoring with asynchronous concurrency to shorten the wait before the first token.</li>
+            <li>Routed queries by confidence between the on-premises RAG path and Azure OpenAI, so the cloud is used only when retrieved evidence is insufficient.</li>
+            <li>Deployed on-premises LLMs with vLLM and automated builds and deployments with Docker and GitLab CI/CD.</li>
+          </ul>
+          <dl class="results">
+            <div>
+              <dt>Precision@10</dt>
+              <dd>80% <span class="to">to</span> 95%</dd>
+            </div>
+            <div>
+              <dt>Time to first token</dt>
+              <dd>50% shorter</dd>
+            </div>
+          </dl>
+        </div>
+        <p class="stack">BM25, dense retrieval, RRF, vLLM, Azure OpenAI, Docker, GitLab CI/CD</p>
+      </article>
+    </section>
+
+    <section class="band" aria-labelledby="earlier-title">
+      <h2 class="band-title" id="earlier-title">Earlier work</h2>
+
+      <div class="earlier">
+        <article id="skin-analysis" class="earlier-item">
+          <header class="case-head">
+            <span class="case-no" aria-hidden="true">3</span>
+            <div>
+              <h3>AI skin-analysis product</h3>
+              <p class="case-meta">Jubilee International Biomedical Co., Ltd. 2024 to 2026</p>
+            </div>
+          </header>
+          <p>
+            Defined a skin-analysis system covering eight assessment metrics, from analysis-to-recommendation
+            workflows to UI prototypes and specifications. A YOLO-based acne detection proof of concept fed the
+            investor presentations that helped the team secure Series A funding. I proposed client-side image
+            tiling and streaming uploads, which cut the analysis wait time by 75%, and ran acceptance testing
+            ahead of the system’s demonstration at the 2026 American Academy of Dermatology Annual Meeting.
+          </p>
+        </article>
+
+        <article class="earlier-item">
+          <h3>Reinforcement learning for the board game Calico</h3>
+          <p class="case-meta">MSc project, King’s College London</p>
+          <p>
+            MCTS, Expectimax and Q-Learning agents for a non-deterministic board game, compared on
+            performance and exploration behaviour in simulation.
+          </p>
+          <p><a class="text-link" href="https://github.com/Jaycome/Calico-with-MCTS">View the code on GitHub</a></p>
+        </article>
+
+        <article class="earlier-item">
+          <h3>Barcode, a domain-specific modelling language</h3>
+          <p class="case-meta">MSc project, King’s College London</p>
+          <p>
+            A Java-based DSML for automated cocktail preparation with textual syntax, model
+            transformation, validation, auto-correction and JUnit model verification.
+          </p>
+          <p><a class="text-link" href="https://github.com/Jaycome/barcode_dsml">View the code on GitHub</a></p>
+        </article>
       </div>
     </section>
 
-    <section id="contact" class="section contact">
-      <div class="contact-card">
-        <p class="eyebrow">Contact</p>
-        <h2>Let’s build reliable AI-enabled systems together.</h2>
-        <p>
-          I am open to software engineering, AI application engineering, full-stack engineering,
-          and enterprise system integration opportunities.
-        </p>
-        <div class="contact-links">
-          <a href="mailto:jay0103888@gmail.com">jay0103888@gmail.com</a>
-          <a href="https://github.com/Jaycome" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://www.linkedin.com/in/Wei-Chieh" target="_blank" rel="noopener">LinkedIn</a>
+    <section id="experience" class="band">
+      <h2 class="band-title">Experience</h2>
+      <div class="rows">
+        <div class="row">
+          <p class="when">Jul 2026 to present</p>
+          <div>
+            <h3>AI Software Engineer</h3>
+            <p class="where">Elite Material Co., Ltd.</p>
+            <p>Enterprise RAG, multimodal document Q&amp;A and on-premises LLM deployment.</p>
+          </div>
+        </div>
+        <div class="row">
+          <p class="when">Apr 2024 to May 2026</p>
+          <div>
+            <h3>AI Systems Integration Engineer</h3>
+            <p class="where">Jubilee International Biomedical Co., Ltd.</p>
+            <p>
+              AI product planning and validation, system integration with international vendors, and the
+              IT workstream for a Digiwin ERP implementation and go-live.
+            </p>
+          </div>
         </div>
       </div>
+
+      <h2 class="band-title second">Education</h2>
+      <div class="rows">
+        <div class="row">
+          <p class="when">Sep 2022 to Sep 2023</p>
+          <div>
+            <h3>King’s College London</h3>
+            <p class="where">MSc in Advanced Software Engineering</p>
+          </div>
+        </div>
+        <div class="row">
+          <p class="when">Sep 2018 to Jun 2022</p>
+          <div>
+            <h3>National Chiayi University</h3>
+            <p class="where">Bachelor’s Degree in Information Management, GPA 3.89 / 4.0</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="band">
+      <h2 class="band-title">Skills</h2>
+      <dl class="skills">
+        <div>
+          <dt>LLM and retrieval</dt>
+          <dd>RAG, hybrid retrieval, pointwise scoring, multimodal RAG, PageIndex, vLLM, Qdrant, Elasticsearch</dd>
+        </div>
+        <div>
+          <dt>Languages and frameworks</dt>
+          <dd>Python, SQL, FastAPI, pytest</dd>
+        </div>
+        <div>
+          <dt>Infrastructure and deployment</dt>
+          <dd>Docker, GitLab CI/CD, Azure OpenAI, Linux, GCP</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section id="contact" class="band contact">
+      <h2 class="band-title">Contact</h2>
+      <p class="contact-line">
+        I’m open to AI software engineering roles. Email is the fastest way to reach me.
+      </p>
+      <ul class="contact-links">
+        <li><a href="mailto:jay0103888@gmail.com">jay0103888@gmail.com</a></li>
+        <li><a href="https://github.com/Jaycome">github.com/Jaycome</a></li>
+        <li><a href="https://www.linkedin.com/in/weichieh-huang/">linkedin.com/in/weichieh-huang</a></li>
+        <li><a href="assets/resume.pdf" download="Wei-Chieh_Huang_Resume.pdf">Resume (PDF)</a></li>
+      </ul>
     </section>
   </main>
 
-  <footer>
-    <p>© <span id="year"></span> Wei-Chieh Huang. Built with GitHub Pages.</p>
+  <footer class="colophon">
+    <p>© 2026 Wei-Chieh Huang</p>
   </footer>
-
-  <script src="script.js"></script>
 </body>
 </html>

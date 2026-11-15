@@ -47,235 +47,223 @@
     landing.classList.add("play");
   }
 
-  /* ---------- Landing: the brain ----------
-     A point cloud in the shape of a brain. Each region is a section of the
-     page: frontal = Work, parietal = Projects, temporal = Experience,
-     occipital = Skills, cerebellum and brainstem = Contact. Points assemble
-     on load, signals travel along the links, regions light up in turn until
-     the visitor points at one, and a click goes to that section. */
+  /* ---------- Landing: the knowledge graph ----------
+     The site as a small force-directed graph. The centre node is the person,
+     the five labelled nodes are the sections, and the small nodes are what
+     each section holds. Nodes spring into place on load, signals travel
+     along the links, sections light up in turn until the visitor points at
+     one, any node can be dragged, and a click goes to that part of the page. */
 
-  function brain(nav) {
+  function graph(nav) {
     var canvas = nav.querySelector("canvas");
     var ctx = canvas.getContext("2d");
     if (!ctx) return;
-    var links = Array.prototype.slice.call(nav.querySelectorAll("a[data-region]"));
-    var REGIONS = links.length;
-    var BW = 400, BH = 330;            // brain space
+    var anchors = Array.prototype.slice.call(nav.querySelectorAll("a[data-node]"));
+    var GW = 400, GH = 360, CX = 200, CY = 180;      // graph space
     var TEAL = "15,109,115", SLATE = "88,98,102";
 
-    // Outlines in brain space (the brain faces left, towards the text)
-    var cerebrum = new Path2D("M62 188C40 120 95 45 195 40C285 36 365 85 372 165C376 205 350 228 318 230C290 232 270 236 245 246C210 262 150 268 118 244C100 232 78 222 62 188Z");
-    var cerebellum = new Path2D();
-    cerebellum.ellipse(300, 264, 54, 31, -0.18, 0, Math.PI * 2);
-    var stem = new Path2D("M226 252C244 262 262 262 272 256C270 284 276 304 284 322L250 322C246 300 238 276 226 252Z");
-    var probe = document.createElement("canvas").getContext("2d");
+    var LEAVES = {
+      work: [["Document QA Agent", "doc-qa"], ["Maintenance RAG", "maintenance-rag"], ["Skin analysis", "skin-analysis"]],
+      projects: [["Harness", "projects"], ["Calico MCTS", "projects"], ["tw50-quant-data", "projects"]],
+      experience: [["Elite Material", "experience"], ["Jubilee Biomedical", "experience"], ["King’s College London", "experience"]],
+      skills: [["RAG", "skills"], ["vLLM", "skills"], ["Python", "skills"], ["Docker", "skills"], ["FastAPI", "skills"]],
+      contact: [["Email", "contact"], ["GitHub", "contact"], ["LinkedIn", "contact"]]
+    };
+    // Which skills were used where
+    var CROSS = [["RAG", "Document QA Agent"], ["RAG", "Maintenance RAG"], ["vLLM", "Maintenance RAG"],
+                 ["Docker", "Maintenance RAG"], ["Docker", "Harness"], ["Python", "Harness"], ["Python", "Calico MCTS"]];
 
-    function regionAt(x, y) {
-      if (probe.isPointInPath(cerebrum, x, y)) {
-        if (x > 96 && x < 272 && y > 207 - (x - 96) * 0.2) return 2;   // below the lateral fissure
-        if (x > 312 - (y - 40) * 0.1) return 3;                         // rear
-        if (x < 188 + (y - 40) * 0.14) return 0;                        // ahead of the central sulcus
-        return 1;
-      }
-      if (probe.isPointInPath(cerebellum, x, y) || probe.isPointInPath(stem, x, y)) return 4;
-      return -1;
-    }
-
-    function random(seed) {
-      return function () {
-        seed = (seed * 1664525 + 1013904223) % 4294967296;
-        return seed / 4294967296;
-      };
-    }
-
-    var points = [], edges = [], pulses = [], ripples = [];
-    var heat = [], w = 0, h = 0, scale = 1, ox = 0, oy = 0;
-    var active = -1, hovered = -1, pointer = null;
-    var visible = true, frameId = 0, born = 0, lastPulse = 0;
-    for (var r = 0; r < REGIONS; r++) heat.push(0);
-
-    function build() {
-      var rand = random(20261115);
-      var target = w < 340 ? 230 : 350;
-      var minDist = w < 340 ? 11.5 : 9.4;
-      points = [];
-      for (var tries = 0; tries < 40000 && points.length < target; tries++) {
-        var x = 36 + rand() * 344, y = 32 + rand() * 294;
-        var region = regionAt(x, y);
-        if (region < 0) continue;
-        var ok = true;
-        for (var i = 0; i < points.length; i++) {
-          var dx = points[i].bx - x, dy = points[i].by - y;
-          if (dx * dx + dy * dy < minDist * minDist) { ok = false; break; }
-        }
-        if (!ok) continue;
-        points.push({
-          bx: x, by: y, region: region,
-          sx: -60 + rand() * 520, sy: -40 + rand() * 410,   // scattered start
-          delay: region * 0.16 + rand() * 0.35,
-          phase: rand() * Math.PI * 2, speed: 0.5 + rand() * 0.7,
-          r: 1.25 + rand() * 1.1, x: 0, y: 0
-        });
-      }
-      // Link each point to its nearest neighbours in the same region, so the
-      // gaps between regions read as the fissures between lobes.
-      edges = [];
-      var seen = {};
-      points.forEach(function (p, i) {
-        var near = [];
-        points.forEach(function (o, j) {
-          if (i === j || o.region !== p.region) return;
-          var d = (o.bx - p.bx) * (o.bx - p.bx) + (o.by - p.by) * (o.by - p.by);
-          if (d < 34 * 34) near.push([d, j]);
-        });
-        near.sort(function (a, b) { return a[0] - b[0]; });
-        near.slice(0, 3).forEach(function (n) {
-          var key = Math.min(i, n[1]) + "-" + Math.max(i, n[1]);
-          if (seen[key]) return;
-          seen[key] = true;
-          edges.push({ a: i, b: n[1], region: p.region });
-        });
+    var nodes = [], edges = [], pulses = [], byLabel = {};
+    var centre = { kind: "centre", x: CX, y: CY, vx: 0, vy: 0, charge: 3.2, section: -1, r: 21 };
+    nodes.push(centre);
+    anchors.forEach(function (a, i) {
+      var angle = -2.5 + i * (Math.PI * 2 / anchors.length);
+      var section = { kind: "section", el: a, section: i, charge: 2.6, r: 30, vx: 0, vy: 0,
+                      x: CX + Math.cos(angle) * 8, y: CY + Math.sin(angle) * 8 };
+      nodes.push(section);
+      edges.push({ a: centre, b: section, len: 90, k: 0.03, section: i });
+      (LEAVES[a.dataset.node] || []).forEach(function (leaf, j) {
+        var node = { kind: "leaf", label: leaf[0], target: leaf[1], section: i, charge: 1, r: 4.2, vx: 0, vy: 0,
+                     x: section.x + Math.cos(angle + j) * 4, y: section.y + Math.sin(angle + j) * 4 };
+        nodes.push(node);
+        byLabel[leaf[0]] = node;
+        edges.push({ a: section, b: node, len: 62, k: 0.05, section: i });
       });
-      pulses = [];
-    }
+    });
+    CROSS.forEach(function (pair) {
+      edges.push({ a: byLabel[pair[0]], b: byLabel[pair[1]], len: 130, k: 0.0012, cross: true });
+    });
+    nodes.forEach(function (n, i) { n.phase = i * 1.7; });
+
+    var heat = anchors.map(function () { return 0; });
+    var w = 0, h = 0, scale = 1, ox = 0, oy = 0;
+    var active = -1, hovered = null, dragging = null, moved = false, suppressClick = false;
+    var visible = true, frameId = 0, born = 0, lastPulse = 0, ticks = 0;
 
     function layout() {
       var rect = canvas.getBoundingClientRect();
       var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      var rebuilt = !points.length || (rect.width < 340) !== (w < 340);
       w = rect.width; h = rect.height;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      scale = Math.min(w / BW, h / BH);
-      ox = (w - BW * scale) / 2;
-      oy = (h - BH * scale) / 2;
-      if (rebuilt) build();
+      scale = Math.min(w / GW, h / GH);
+      ox = (w - GW * scale) / 2;
+      oy = (h - GH * scale) / 2;
     }
 
-    function ease(t) {
-      t = Math.max(0, Math.min(1, t));
-      return 1 - Math.pow(1 - t, 3);
-    }
-
-    function setActive(region) {
-      if (region === active) return;
-      active = region;
-      links.forEach(function (a) {
-        a.classList.toggle("on", Number(a.dataset.region) === region);
+    function step(t) {
+      var i, j, a, b, dx, dy, d, f;
+      for (i = 0; i < nodes.length; i++) {
+        a = nodes[i];
+        for (j = i + 1; j < nodes.length; j++) {
+          b = nodes[j];
+          dx = b.x - a.x; dy = b.y - a.y;
+          d = Math.max(Math.sqrt(dx * dx + dy * dy), 10);
+          f = 620 * a.charge * b.charge / (d * d);
+          dx /= d; dy /= d;
+          a.vx -= dx * f; a.vy -= dy * f;
+          b.vx += dx * f; b.vy += dy * f;
+        }
+      }
+      edges.forEach(function (e) {
+        dx = e.b.x - e.a.x; dy = e.b.y - e.a.y;
+        d = Math.max(Math.sqrt(dx * dx + dy * dy), 1);
+        f = (d - e.len) * e.k;
+        dx /= d; dy /= d;
+        e.a.vx += dx * f; e.a.vy += dy * f;
+        e.b.vx -= dx * f; e.b.vy -= dy * f;
       });
+      centre.vx += (CX - centre.x) * 0.09;
+      centre.vy += (CY - centre.y) * 0.09;
+      nodes.forEach(function (n) {
+        if (n === dragging) { n.vx = 0; n.vy = 0; return; }
+        n.vx += (CX - n.x) * 0.0016 + Math.sin(t * 0.7 + n.phase) * 0.028;   // keeps it gently alive
+        n.vy += (CY - n.y) * 0.0016 + Math.cos(t * 0.6 + n.phase) * 0.028;
+        n.vx *= 0.8; n.vy *= 0.8;
+        var speed = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
+        if (speed > 7) { n.vx *= 7 / speed; n.vy *= 7 / speed; }
+        n.x += n.vx; n.y += n.vy;
+        var padX = n.kind === "section" ? 36 : 12, padY = n.kind === "section" ? 16 : 12;
+        n.x = Math.max(padX, Math.min(GW - padX, n.x));
+        n.y = Math.max(padY, Math.min(GH - padY, n.y));
+      });
+    }
+
+    function px(n) { return ox + n.x * scale; }
+    function py(n) { return oy + n.y * scale; }
+
+    function setActive(section) {
+      if (section === active) return;
+      active = section;
+      anchors.forEach(function (a, i) { a.classList.toggle("on", i === section); });
     }
 
     function draw(now, settled) {
       var t = settled ? 99 : (now - born) / 1000;
-      var i, p, e, a, b;
+      var i, e, n;
+      if (!settled) { step(t); ticks += 1; }
 
-      // Until the visitor points at a region, light them up in turn
-      if (!settled && hovered < 0 && t > 2.6) setActive(Math.floor((t - 2.6) / 2.4) % REGIONS);
+      // Until the visitor points at something, light the sections up in turn
+      if (!settled && !hovered && !dragging && t > 2.4) setActive(Math.floor((t - 2.4) / 2.4) % anchors.length);
 
-      for (i = 0; i < REGIONS; i++) {
+      for (i = 0; i < heat.length; i++) {
         var goal = i === active ? 1 : 0;
-        heat[i] = settled ? goal : heat[i] + (goal - heat[i]) * 0.1;
+        heat[i] = settled ? goal : heat[i] + (goal - heat[i]) * 0.12;
       }
       var anyHeat = Math.max.apply(null, heat);
+      var shown = settled ? 1 : Math.max(0, Math.min(1, (t - 0.25) / 0.9));
 
-      var formed = 0;
-      for (i = 0; i < points.length; i++) {
-        p = points[i];
-        var k = ease((t - 0.35 - p.delay) / 1.5);
-        formed += k;
-        var wob = settled ? 0 : 1.6;
-        var tx = p.bx + Math.sin(t * p.speed + p.phase) * wob;
-        var ty = p.by + Math.cos(t * p.speed * 0.8 + p.phase) * wob;
-        var lift = heat[p.region] * 3;   // an active region swells slightly
-        p.x = ox + (p.sx + (tx - p.sx) * k) * scale;
-        p.y = oy + (p.sy + (ty - p.sy) * k - lift) * scale;
-      }
-      formed = points.length ? formed / points.length : 1;
-      var wired = ease((formed - 0.75) / 0.25);
+      anchors.forEach(function (a) {
+        a.style.setProperty("--tx", px(a.node).toFixed(1) + "px");
+        a.style.setProperty("--ty", py(a.node).toFixed(1) + "px");
+      });
 
       ctx.clearRect(0, 0, w, h);
 
       // Links
-      ctx.lineWidth = 1;
       for (i = 0; i < edges.length; i++) {
         e = edges[i];
-        a = points[e.a]; b = points[e.b];
-        var hot = heat[e.region];
-        var alpha = (0.2 - 0.09 * (anyHeat - hot) + 0.45 * hot) * wired;
-        if (alpha < 0.01) continue;
-        ctx.strokeStyle = "rgba(" + (hot > 0.25 ? TEAL : SLATE) + "," + alpha.toFixed(3) + ")";
+        var hot = e.cross ? Math.max(heat[e.a.section], heat[e.b.section]) * 0.6 : heat[e.section];
+        var base = e.cross ? 0.09 : 0.3;
+        var alpha = (base - base * 0.45 * (anyHeat - hot) + 0.5 * hot) * shown;
+        ctx.strokeStyle = "rgba(" + (hot > 0.2 ? TEAL : SLATE) + "," + alpha.toFixed(3) + ")";
+        ctx.lineWidth = e.cross ? 1 : 1.3;
+        if (e.cross) ctx.setLineDash([3, 4]); else ctx.setLineDash([]);
         ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
+        ctx.moveTo(px(e.a), py(e.a));
+        ctx.lineTo(px(e.b), py(e.b));
         ctx.stroke();
       }
+      ctx.setLineDash([]);
 
-      // Signals travelling along the links
-      if (!settled && wired > 0.9) {
-        if (now - lastPulse > 70 && pulses.length < 46) {
+      // Signals travelling outwards along the links
+      if (!settled && shown >= 1) {
+        if (now - lastPulse > 150 && pulses.length < 16) {
           lastPulse = now;
-          var pick = edges[Math.floor(Math.random() * edges.length)];
-          if (active >= 0 && Math.random() < 0.7) {
-            for (var n = 0; n < 6 && pick.region !== active; n++) {
-              pick = edges[Math.floor(Math.random() * edges.length)];
-            }
-          }
-          pulses.push({ edge: pick, t: 0, flip: Math.random() < 0.5 });
+          var pool = edges.filter(function (ed) { return !ed.cross && (active < 0 || ed.section === active || Math.random() < 0.25); });
+          pulses.push({ edge: pool[Math.floor(Math.random() * pool.length)], t: 0 });
         }
         for (i = pulses.length - 1; i >= 0; i--) {
           var pulse = pulses[i];
-          pulse.t += 0.035;
+          pulse.t += 0.028;
           if (pulse.t >= 1) { pulses.splice(i, 1); continue; }
-          a = points[pulse.flip ? pulse.edge.b : pulse.edge.a];
-          b = points[pulse.flip ? pulse.edge.a : pulse.edge.b];
-          ctx.fillStyle = "rgba(" + TEAL + "," + (0.9 * Math.sin(pulse.t * Math.PI)).toFixed(3) + ")";
+          ctx.fillStyle = "rgba(" + TEAL + "," + (0.95 * Math.sin(pulse.t * Math.PI)).toFixed(3) + ")";
           ctx.beginPath();
-          ctx.arc(a.x + (b.x - a.x) * pulse.t, a.y + (b.y - a.y) * pulse.t, 1.9, 0, Math.PI * 2);
+          ctx.arc(px(pulse.edge.a) + (px(pulse.edge.b) - px(pulse.edge.a)) * pulse.t,
+                  py(pulse.edge.a) + (py(pulse.edge.b) - py(pulse.edge.a)) * pulse.t, 2.3, 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
-      // Points
-      for (i = 0; i < points.length; i++) {
-        p = points[i];
-        var ph = heat[p.region];
-        var dim = 0.62 - 0.27 * (anyHeat - ph);
-        ctx.fillStyle = ph > 0.02
-          ? "rgba(" + TEAL + "," + (dim + (1 - dim) * ph).toFixed(3) + ")"
-          : "rgba(" + SLATE + "," + dim.toFixed(3) + ")";
+      // Leaf nodes and, for the active section, their names
+      ctx.font = "600 " + Math.max(11.5, 13 * Math.min(scale, 1.05)).toFixed(1) + "px 'Source Sans 3', system-ui, sans-serif";
+      ctx.textBaseline = "middle";
+      for (i = 0; i < nodes.length; i++) {
+        n = nodes[i];
+        if (n.kind !== "leaf") continue;
+        var nh = heat[n.section];
+        var x = px(n), y = py(n);
+        var isHovered = n === hovered || n === dragging;
+        var dim = 0.6 - 0.25 * (anyHeat - nh);
+        ctx.fillStyle = nh > 0.02
+          ? "rgba(" + TEAL + "," + ((dim + (1 - dim) * nh) * shown).toFixed(3) + ")"
+          : "rgba(" + SLATE + "," + (dim * shown).toFixed(3) + ")";
         ctx.beginPath();
-        ctx.arc(p.x, p.y, (p.r + 0.9 * ph) * Math.max(scale, 0.8), 0, Math.PI * 2);
+        ctx.arc(x, y, (n.r + 1.6 * nh + (isHovered ? 1.5 : 0)) * Math.max(scale, 0.85), 0, Math.PI * 2);
         ctx.fill();
+        if (nh > 0.05) {
+          var parent = anchors[n.section].node;
+          var right = n.x >= parent.x;
+          var tw = ctx.measureText(n.label).width;
+          if (right && x + 9 + tw > w - 3) right = false;       // no room: flip to the other side
+          if (!right && x - 9 - tw < 3) right = true;
+          var tx = right ? x + 9 : x - 9 - tw;
+          tx = Math.max(3, Math.min(w - tw - 3, tx));
+          ctx.fillStyle = "rgba(250,246,236," + (0.85 * nh).toFixed(3) + ")";
+          ctx.fillRect(tx - 3, y - 9, tw + 6, 18);
+          ctx.fillStyle = "rgba(" + (isHovered ? TEAL : "35,41,43") + "," + nh.toFixed(3) + ")";
+          ctx.fillText(n.label, tx, y + 0.5);
+        }
       }
 
-      // The pointer links to its nearest points, like a query in a vector index
-      if (pointer && wired > 0.9) {
-        var near = points.map(function (q) {
-          return [(q.x - pointer.x) * (q.x - pointer.x) + (q.y - pointer.y) * (q.y - pointer.y), q];
-        }).sort(function (m, n2) { return m[0] - n2[0]; }).slice(0, 5);
-        ctx.lineWidth = 1.2;
-        near.forEach(function (m) {
-          if (m[0] > 90 * 90) return;
-          ctx.strokeStyle = "rgba(" + TEAL + ",0.55)";
-          ctx.beginPath();
-          ctx.moveTo(pointer.x, pointer.y);
-          ctx.lineTo(m[1].x, m[1].y);
-          ctx.stroke();
-        });
-      }
-
-      // Ripples from a click or tap
-      for (i = ripples.length - 1; i >= 0; i--) {
-        var rp = ripples[i];
-        rp.t += 0.03;
-        if (rp.t >= 1) { ripples.splice(i, 1); continue; }
-        ctx.strokeStyle = "rgba(" + TEAL + "," + (0.6 * (1 - rp.t)).toFixed(3) + ")";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(rp.x, rp.y, 6 + rp.t * 70, 0, Math.PI * 2);
-        ctx.stroke();
-      }
+      // Centre node
+      var cr = centre.r * Math.max(scale, 0.85);
+      var beat = settled ? 0 : (t % 2.4) / 2.4;
+      ctx.strokeStyle = "rgba(" + TEAL + "," + (0.4 * (1 - beat) * shown).toFixed(3) + ")";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(px(centre), py(centre), cr + beat * 20, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(" + TEAL + "," + shown.toFixed(3) + ")";
+      ctx.beginPath();
+      ctx.arc(px(centre), py(centre), cr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,253,247," + shown.toFixed(3) + ")";
+      ctx.font = "650 " + (15 * Math.max(scale, 0.85)).toFixed(1) + "px 'Schibsted Grotesk', system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("WH", px(centre), py(centre) + 1);
+      ctx.textAlign = "start";
     }
 
     function loop(now) {
@@ -297,58 +285,89 @@
       if (reduce) draw(0, true);
     }
 
-    function regionFromEvent(event) {
+    function nodeAt(event) {
       var rect = canvas.getBoundingClientRect();
-      var px = event.clientX - rect.left, py = event.clientY - rect.top;
-      var region = regionAt((px - ox) / scale, (py - oy) / scale);
-      if (region < 0) {
-        // Forgive near misses: take the region of the closest point
-        var best = 26 * 26;
-        points.forEach(function (p) {
-          var d = (p.x - px) * (p.x - px) + (p.y - py) * (p.y - py);
-          if (d < best) { best = d; region = p.region; }
-        });
-      }
-      return { region: region, x: px, y: py };
+      var x = event.clientX - rect.left, y = event.clientY - rect.top;
+      var best = null, bestD = Infinity;
+      nodes.forEach(function (n) {
+        var reach = (n.kind === "leaf" ? 15 : n.kind === "section" ? 34 : 26);
+        var d = Math.sqrt((px(n) - x) * (px(n) - x) + (py(n) - y) * (py(n) - y));
+        if (d < reach && d < bestD) { best = n; bestD = d; }
+      });
+      return { node: best, gx: (x - ox) / scale, gy: (y - oy) / scale };
     }
 
-    function point(region) {
-      hovered = region;
-      if (region >= 0) setActive(region);
-      else if (reduce) setActive(-1);
-      canvas.style.cursor = region >= 0 ? "pointer" : "";
+    function point(node) {
+      hovered = node;
+      if (node && node.section >= 0) setActive(node.section);
+      else if (reduce && !node) setActive(-1);
+      nav.style.cursor = node ? (dragging ? "grabbing" : "pointer") : "";
       redraw();
     }
 
-    canvas.addEventListener("pointermove", function (event) {
-      var hit = regionFromEvent(event);
-      pointer = event.pointerType === "mouse" ? { x: hit.x, y: hit.y } : null;
-      point(hit.region);
+    function go(node) {
+      if (node.kind === "section") { node.el.click(); return; }
+      if (node.kind === "centre") { window.location.hash = "#top"; return; }
+      window.location.hash = "#" + node.target;
+    }
+
+    anchors.forEach(function (a) { a.node = nodes.filter(function (n) { return n.el === a; })[0]; });
+
+    nav.addEventListener("pointerdown", function (event) {
+      var hit = nodeAt(event);
+      if (!hit.node || reduce) return;
+      dragging = hit.node;
+      moved = false;
+      dragging.grabX = hit.gx; dragging.grabY = hit.gy;
+      nav.setPointerCapture(event.pointerId);
+      nav.style.cursor = "grabbing";
     });
-    canvas.addEventListener("pointerleave", function () {
-      pointer = null;
-      point(-1);
-      born = performance.now() - 2600;   // resume the tour from the first region
+    nav.addEventListener("pointermove", function (event) {
+      var hit = nodeAt(event);
+      if (dragging) {
+        if (Math.abs(hit.gx - dragging.grabX) + Math.abs(hit.gy - dragging.grabY) > 6) moved = true;
+        if (moved) {
+          dragging.x = Math.max(10, Math.min(GW - 10, hit.gx));
+          dragging.y = Math.max(10, Math.min(GH - 10, hit.gy));
+        }
+        return;
+      }
+      point(hit.node);
     });
-    canvas.addEventListener("click", function (event) {
-      var hit = regionFromEvent(event);
-      if (hit.region < 0) return;
-      setActive(hit.region);
-      ripples.push({ x: hit.x, y: hit.y, t: 0 });
-      var link = links[hit.region];
-      setTimeout(function () { link.click(); }, reduce ? 0 : 320);
+    function release(event) {
+      if (!dragging) return;
+      var node = dragging;
+      dragging = null;
+      nav.style.cursor = "";
+      if (moved) {
+        suppressClick = true;                    // a drag is not a click
+        setTimeout(function () { suppressClick = false; }, 60);
+      } else if (event.type === "pointerup") {
+        // Pointer capture retargets the click to the container, so follow
+        // the node's link here instead of relying on the native click.
+        go(node);
+      }
+    }
+    nav.addEventListener("pointerup", release);
+    nav.addEventListener("pointercancel", release);
+    nav.addEventListener("pointerleave", function () {
+      if (dragging) return;
+      point(null);
+      born = performance.now() - 2400;           // resume the tour from the first section
     });
-    links.forEach(function (a) {
-      var region = Number(a.dataset.region);
-      a.addEventListener("pointerenter", function () { point(region); });
-      a.addEventListener("pointerleave", function () { point(-1); });
-      a.addEventListener("focus", function () { point(region); });
-      a.addEventListener("blur", function () { point(-1); });
+    nav.addEventListener("click", function (event) {
+      if (suppressClick) { event.preventDefault(); event.stopPropagation(); }
+    }, true);
+    anchors.forEach(function (a) {
+      a.addEventListener("focus", function () { point(a.node); });
+      a.addEventListener("blur", function () { point(null); });
+      a.addEventListener("dragstart", function (event) { event.preventDefault(); });
     });
 
     layout();
     born = performance.now();
     if (reduce) {
+      for (var s = 0; s < 400; s++) step(0);    // settle without showing the motion
       draw(0, true);
     } else {
       start();
@@ -373,8 +392,8 @@
     });
   }
 
-  var brainNav = document.querySelector(".brain");
-  if (brainNav) brain(brainNav);
+  var graphNav = document.querySelector(".graph");
+  if (graphNav) graph(graphNav);
 
   /* ---------- Pipelines and results run when scrolled into view ---------- */
 

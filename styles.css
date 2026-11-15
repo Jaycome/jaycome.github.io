@@ -169,69 +169,73 @@ main > section {
   min-width: 0;
 }
 
-/* The brain: each region is a section of the page */
+/* The knowledge graph: the page as nodes that can be dragged */
 
-.brain {
+.graph {
   position: relative;
   width: 100%;
   max-width: 34rem;
   justify-self: center;
 }
 
-.brain ul {
+.graph ul {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-.brain a {
+.graph a {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 0.8rem;
   font-family: var(--display);
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.3;
   color: var(--ink);
-  background: color-mix(in srgb, var(--paper) 90%, transparent);
-  border: 1px solid var(--rule);
+  background: var(--paper);
+  border: 1px solid var(--slate);
   border-radius: 999px;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 0.25s, color 0.25s, border-color 0.25s, transform 0.25s;
+  transition: background-color 0.25s, color 0.25s, border-color 0.25s;
 }
 
-.brain canvas {
+.graph canvas {
   display: none;
 }
 
-/* With the script running, the links sit on their regions */
-.js .brain {
-  aspect-ratio: 400 / 330;
+/* With the script running, the links become nodes placed by the simulation */
+.js .graph {
+  aspect-ratio: 400 / 360;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
-.js .brain canvas {
+.js .graph canvas {
   display: block;
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  touch-action: pan-y;
 }
 
-.js .brain a {
+.js .graph a {
   position: absolute;
-  left: var(--x);
-  top: var(--y);
-  transform: translate(-50%, -50%);
+  left: 0;
+  top: 0;
+  transform: translate(calc(var(--tx, 0px) - 50%), calc(var(--ty, 0px) - 50%)) scale(var(--grow, 1));
+  cursor: grab;
+  -webkit-user-drag: none;
 }
 
-.js .brain a.on,
-.js .brain a:hover,
-.js .brain a:focus-visible {
+.js .graph a.on,
+.js .graph a:hover,
+.js .graph a:focus-visible {
+  --grow: 1.08;
   color: var(--paper);
   background: var(--teal);
   border-color: var(--teal);
-  transform: translate(-50%, -50%) scale(1.08);
 }
 
 .role {
@@ -749,12 +753,12 @@ h3 {
     padding-top: 1.25rem;
   }
 
-  .brain {
+  .graph {
     order: -1;
     max-width: 21rem;
   }
 
-  .brain a {
+  .graph a {
     font-size: 0.85rem;
     padding: 0.2rem 0.6rem;
   }
@@ -927,13 +931,13 @@ h3 {
   }
 
   .js .landing-inner > *,
-  .js .brain {
+  .js .graph {
     opacity: 0;
     /* If the script never runs, show everything after a moment */
     animation: reveal 0.4s 3s forwards;
   }
 
-  .js .landing.play .brain {
+  .js .landing.play .graph {
     animation: reveal 0.8s 0.1s forwards;
   }
 

@@ -17,8 +17,8 @@ skills and contact details follow. Work content mirrors the resume in `assets/re
 
 - Milk-white background, charcoal text, one teal accent shared with the resume
 - Schibsted Grotesk for headings, Source Sans 3 for text, both self-hosted (OFL-1.1)
-- The landing screen plays out a retrieval-augmented answer: a question is typed, the resume summary streams in, and its sources attach as links to the case studies
-- Beside it, the site as a knowledge graph on a rotating sphere. The centre node is the person, the five labelled nodes are the sections and real links, the small nodes are what each section holds, and dashed links join skills to the work that used them. It turns on its own, can be spun by dragging, and lights whichever section faces the visitor. Once the question is typed, a retrieval runs across it (centre, Work, then the three cited cases), and hovering a source turns the sphere to its node. Without JavaScript the same links are a plain list
+- The landing screen plays out a retrieval-augmented answer: the resume summary streams in, and its sources attach as links to the case studies
+- Beside it, the site as a knowledge graph on a rotating sphere. The centre node is the person, the five labelled nodes are the sections and real links, the small nodes are what each section holds, and dashed links join skills to the work that used them. It turns on its own, can be spun by dragging, and lights whichever section faces the visitor. As the answer streams in, a retrieval runs across it (centre, Work, then the three cited cases), and hovering a source turns the sphere to its node. Without JavaScript the same links are a plain list
 - Pipelines run step by step as they scroll into view and result figures count up. All motion is off under `prefers-reduced-motion`
 - Plain HTML and CSS with one small optional script: no build step, no external requests, and the page is complete without JavaScript
 

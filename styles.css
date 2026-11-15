@@ -250,25 +250,6 @@ main > section {
   margin-bottom: 1.1rem;
 }
 
-.query {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  max-width: 100%;
-  padding: 0.5rem 1.1rem 0.5rem 0.85rem;
-  margin-bottom: clamp(1.2rem, 2.4vw, 1.6rem);
-  color: var(--slate);
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  box-shadow: 0 8px 24px -18px rgba(35, 41, 43, 0.5);
-}
-
-.query svg {
-  flex: none;
-  color: var(--teal);
-}
-
 h1 {
   font-family: var(--display);
   font-weight: 600;
@@ -799,10 +780,6 @@ h3 {
     font-size: 1.15rem;
   }
 
-  .query {
-    font-size: 1rem;
-  }
-
   .masthead nav {
     gap: 0.1rem 0.75rem;
     font-size: 0.92rem;
@@ -905,7 +882,7 @@ h3 {
     }
   }
 
-  /* Landing sequence: the question is typed, then the answer streams in
+  /* Landing sequence: the answer streams in
      and its sources are attached. script.js sets --d on each piece. */
   @keyframes ink {
     0% {
@@ -961,10 +938,6 @@ h3 {
 
   .landing.play [data-stream] > span {
     animation: ink 0.5s var(--d, 0s) both;
-  }
-
-  .landing.play [data-stream="char"] > span {
-    animation-duration: 0.12s;
   }
 
   .landing.play .retrieved p {

@@ -2,30 +2,22 @@
 (function () {
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- Landing: typed question, streamed answer ---------- */
+  /* ---------- Landing: streamed answer ---------- */
 
-  // Wrap each word (or character) in a span so CSS can reveal them in turn.
+  // Wrap each word in a span so CSS can reveal them in turn.
   function stream(el, start, step) {
-    var byChar = el.dataset.stream === "char";
-    var text = el.textContent.replace(/\s+/g, " ").trim();
-    var parts = byChar ? Array.from(text) : text.split(" ");
+    var parts = el.textContent.replace(/\s+/g, " ").trim().split(" ");
     var frag = document.createDocumentFragment();
-    var n = 0;
     parts.forEach(function (part, i) {
-      if (byChar && part === " ") {
-        frag.appendChild(document.createTextNode(" "));
-        return;
-      }
       var span = document.createElement("span");
       span.textContent = part;
-      span.style.setProperty("--d", (start + n * step).toFixed(3) + "s");
+      span.style.setProperty("--d", (start + i * step).toFixed(3) + "s");
       frag.appendChild(span);
-      if (!byChar && i < parts.length - 1) frag.appendChild(document.createTextNode(" "));
-      n += 1;
+      if (i < parts.length - 1) frag.appendChild(document.createTextNode(" "));
     });
     el.textContent = "";
     el.appendChild(frag);
-    return start + n * step;
+    return start + parts.length * step;
   }
 
   function delay(el, seconds) {
@@ -35,17 +27,15 @@
   var landing = document.querySelector(".landing");
   var retrieval = null;   // when the graph should run its retrieval, in ms
   if (landing && !reduce) {
-    var query = landing.querySelector(".query");
-    var typed = stream(landing.querySelector("[data-stream='char']"), 0.45, 0.03);
-    delay(query, 0.1);
-    delay(landing.querySelector("h1"), typed + 0.15);
-    var answered = stream(landing.querySelector(".summary"), typed + 0.75, 0.026);
-    delay(landing.querySelector(".actions"), typed + 0.9);
+    var begin = 0.1;
+    delay(landing.querySelector("h1"), begin);
+    var answered = stream(landing.querySelector(".summary"), begin + 0.6, 0.026);
+    delay(landing.querySelector(".actions"), begin + 0.75);
     delay(landing.querySelector(".retrieved p"), answered);
     landing.querySelectorAll(".retrieved li").forEach(function (li, i) {
       delay(li, answered + 0.12 + i * 0.15);
     });
-    retrieval = { start: typed * 1000, end: (answered + 0.9) * 1000 };
+    retrieval = { start: begin * 1000, end: (answered + 0.9) * 1000 };
     landing.classList.add("play");
   }
 
@@ -54,7 +44,7 @@
      the five labelled nodes are the sections, the small nodes are what each
      section holds, and the faint mesh is the rest of the index. It turns on
      its own, can be spun by dragging, and lights up whichever section faces
-     the visitor. When the question on the left has been typed, a retrieval
+     the visitor. As the answer on the left streams in, a retrieval
      runs across it: centre, Work, then the three cases the answer cites. */
 
   function graph(nav, timing) {
@@ -133,7 +123,7 @@
       });
     });
 
-    // The retrieval that accompanies the typed question
+    // The retrieval that accompanies the streamed answer
     var workNode = anchors.filter(function (a) { return a.dataset.node === "work"; })[0].node;
     var route = [[centre, workNode], [workNode, byLabel["Document QA Agent"]],
                  [workNode, byLabel["Maintenance RAG"]], [workNode, byLabel["Skin analysis"]]];
